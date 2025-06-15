@@ -25,7 +25,7 @@ const LiveScoring = () => {
     const fetchScores = async () => {
       try {
         const response = await fetch(
-          'https://api.cricapi.com/v1/currentMatches?apikey=5e6fada2-de9d-439b-a7bb-036ed11919a3&offset=0'
+          'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent" {:headers {:x-rapidapi-host "cricbuzz-cricket.p.rapidapi.com'
         );
         const data = await response.json();
 
