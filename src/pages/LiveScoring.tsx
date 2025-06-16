@@ -25,7 +25,13 @@ const LiveScoring = () => {
     const fetchScores = async () => {
       try {
         const response = await fetch(
-          'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent" {:headers {:x-rapidapi-host "cricbuzz-cricket.p.rapidapi.com'
+          'https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent',
+          {
+            headers: {
+              'x-rapidapi-host': 'cricbuzz-cricket.p.rapidapi.com',
+              'x-rapidapi-key': import.meta.env.VITE_RAPIDAPI_KEY || ''
+            }
+          }
         );
         const data = await response.json();
 
