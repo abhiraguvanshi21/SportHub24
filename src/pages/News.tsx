@@ -85,7 +85,7 @@ const News = () => {
       category: 'breaking',
       timestamp: '2025-01-14T09:15:00Z',
       author: 'Sarah Johnson',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://news24sports.in/wp-content/uploads/2025/06/Cricket-Border-2025-06-18T162531.641.jpg',
       views: 12345,
       comments: 167,
       tags: ['Women\'s Cricket', 'T20 World Cup', '2025', 'Australia', 'Lanning'],
@@ -113,7 +113,7 @@ const News = () => {
       category: 'analysis',
       timestamp: '2025-01-13T14:00:00Z',
       author: 'Ahmed Hassan',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%3Fid%3DOIP.cqN-UtIBqylM8M0RgEgYrwHaEK%26r%3D0%26pid%3DApi&f=1&ipt=bb630b4489862fef4f33693de6f7b11c94afccc74660a5766833e6bfa0f0c7c4&ipo=images',
       views: 8765,
       comments: 112,
       tags: ['PSL', '2025', 'Draft', 'Pakistan', 'Analysis']
@@ -126,7 +126,7 @@ const News = () => {
       category: 'upcoming',
       timestamp: '2025-01-12T11:45:00Z',
       author: 'Rohit Gupta',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIF.bM%252bmwYncN35LdXcmRZypsw%26r%3D0%26pid%3DApi&f=1&ipt=93147026db278fe863cb45476470125fea2b7a0711fb9b6d7654ab764568443b&ipo=images',
       views: 16789,
       comments: 245,
       tags: ['Border-Gavaskar', '2025', 'India', 'Australia', 'Test Series']
@@ -152,7 +152,7 @@ const News = () => {
       category: 'breaking',
       timestamp: '2025-01-11T17:20:00Z',
       author: 'Suresh Menon',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.vos9Ji60Mz-Tz2vK-zjkeQHaEK%26pid%3DApi&f=1&ipt=87e94ec5ed3ebe83d450563fa687a3f23db7671fbd1b1ba4e2801b18ab7f1b61&ipo=images',
       views: 22345,
       comments: 456,
       tags: ['Rohit Sharma', 'Retirement', 'T20I', 'India', 'Captain'],
@@ -181,7 +181,7 @@ const News = () => {
       category: 'transfer',
       timestamp: '2025-01-10T16:00:00Z',
       author: 'BBL Reporter',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%3Fid%3DOIP.Shn5mpFSzomFoSsil6u4xwHaEK%26pid%3DApi&f=1&ipt=d8695163b63d41d68b6bf288252c7a2e2b4b8c8d5888978512b01b5446febfaf&ipo=images',
       views: 7890,
       comments: 123,
       tags: ['BBL', '2025', 'Adelaide', 'Expansion', 'New Team']
@@ -194,7 +194,7 @@ const News = () => {
       category: 'upcoming',
       timestamp: '2025-01-10T12:30:00Z',
       author: 'WTC Correspondent',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIF.sF%252bX%252byTCOwU7OEv7SAtarg%26pid%3DApi&f=1&ipt=6d91f53c7a9757ba013b75e9fb6c8cce59dd6867bad23786d2f6384595b0bcc9&ipo=images',
       views: 15678,
       comments: 234,
       tags: ['WTC Final', '2025', 'India', 'Australia', 'Lord\'s']
