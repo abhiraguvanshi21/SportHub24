@@ -139,7 +139,7 @@ const News = () => {
       category: 'upcoming',
       timestamp: '2025-01-12T08:30:00Z',
       author: 'Jennifer Martinez',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.LZmZX_VYRjpXucpuxSwlXQHaEK%26pid%3DApi&f=1&ipt=f1a81cc583d36346b20e093c2304a2d2d6934991129c35dd0545394bc1977bf5&ipo=images',
       views: 13456,
       comments: 189,
       tags: ['T20 World Cup', '2026', 'USA', 'West Indies', 'Hosting']
