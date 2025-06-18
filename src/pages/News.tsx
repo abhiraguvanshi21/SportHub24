@@ -37,7 +37,7 @@ const News = () => {
   const mockArticles: NewsArticle[] = [
     {
       id: '1',
-      title: 'ICC Champions Trophy 2025: India Squad Announced with Kohli as Captain',
+      title: 'ICC Champions Trophy 2025: India Squad Announced with Rohit as Captain',
       summary: 'BCCI announces a 15-member squad for the Champions Trophy 2025 in Pakistan with Virat Kohli returning as captain after the T20 World Cup triumph.',
       content: 'The Board of Control for Cricket in India has announced a strong 15-member squad for the ICC Champions Trophy 2025...',
       category: 'breaking',
