@@ -390,7 +390,7 @@ const News = () => {
           </div>
           <div className="flex animate-scroll">
             <span className="px-8 text-sm">
-              🚨 Champions Trophy 2025: India squad announced with Kohli as captain
+              🚨 Champions Trophy 2025: India squad announced with Rohit as captain
             </span>
             <span className="px-8 text-sm">
               🏏 IPL 2025 Mega Auction: Record ₹27 crore bid breaks all previous records
