@@ -72,7 +72,7 @@ const News = () => {
       category: 'upcoming',
       timestamp: '2025-01-14T12:20:00Z',
       author: 'Mike Thompson',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%3Fid%3DOIF.%252fQKXZvohLLbS5nWbVtlF2Q%26r%3D0%26pid%3DApi&f=1&ipt=a5c235c67d9c0b1fbb775e2e7f766494813e0609ace499f9c99fdee31eebe60c&ipo=images',
       views: 14567,
       comments: 198,
       tags: ['Ashes', '2025', 'England', 'Australia', 'Schedule']
