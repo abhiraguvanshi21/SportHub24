@@ -43,7 +43,7 @@ const News = () => {
       category: 'breaking',
       timestamp: '2025-01-15T10:30:00Z',
       author: 'Rajesh Kumar',
-      image: 'https://images.pexels.com/photos/1661950/pexels-photo-1661950.jpeg?auto=compress&cs=tinysrgb&w=800',
+      image: 'https://news24online.com/wp-content/uploads/2025/01/Untitled-design-96.jpg',
       views: 25420,
       comments: 334,
       tags: ['India', 'Champions Trophy', 'Squad', 'Kohli', '2025'],
