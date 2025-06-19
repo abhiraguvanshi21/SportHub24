@@ -1,15 +1,43 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { 
-  User, Mail, Phone, Calendar, Trophy, Target, TrendingUp, 
+  User as UserIcon, Mail, Phone, Calendar, Trophy, Target, TrendingUp, 
   Edit3, Save, X, Camera, Award, BarChart3, Activity,
-  Users, MapPin, Star, Clock, Settings
+  Users, Star, Settings
 } from 'lucide-react';
+// Import the User type/interface from your types/models location
+// Define User type locally if not available from '../types/User'
+type PlayingRole = "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper" | "Not specified";
+
+type User = {
+  name: string;
+  email: string;
+  phone?: string;
+  dateOfBirth?: string;
+  joinedDate: string;
+  profileImage?: string;
+  playingRole: PlayingRole;
+  favoriteTeam?: string;
+  achievements: string[];
+  stats: {
+    matchesPlayed: number;
+    matchesScored: number;
+    totalRuns: number;
+    totalWickets: number;
+    highestScore: number;
+    battingAverage: number;
+    strikeRate: number;
+    bestBowling: string;
+    bowlingAverage: number;
+    economyRate: number;
+  };
+};
 
 const Profile = () => {
   const { user, updateProfile, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState(user || {});
+  type UserProfile = User;
+  const [editData, setEditData] = useState<UserProfile>(user!);
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,10 +55,11 @@ const Profile = () => {
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setEditData({
-      ...editData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setEditData((prev: UserProfile) => ({
+      ...prev,
+      [name]: value
+    }) as UserProfile);
   };
 
   const handleSave = async () => {
@@ -41,9 +70,8 @@ const Profile = () => {
     }
     setIsLoading(false);
   };
-
   const handleCancel = () => {
-    setEditData(user);
+    setEditData(user as UserProfile);
     setIsEditing(false);
   };
 
@@ -59,7 +87,7 @@ const Profile = () => {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: <User className="h-4 w-4" /> },
+    { id: 'overview', label: 'Overview', icon: <UserIcon className="h-4 w-4" /> },
     { id: 'stats', label: 'Statistics', icon: <BarChart3 className="h-4 w-4" /> },
     { id: 'matches', label: 'Match History', icon: <Activity className="h-4 w-4" /> },
     { id: 'achievements', label: 'Achievements', icon: <Award className="h-4 w-4" /> }
@@ -72,18 +100,14 @@ const Profile = () => {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
           <div className="bg-gradient-to-r from-green-600 to-blue-600 h-32 relative">
             <div className="absolute -bottom-16 left-8">
-              <div className="relative">
-                <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                  {user.profileImage ? (
-                    <img src={user.profileImage} alt="Profile" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <User className="h-16 w-16 text-gray-400" />
-                  )}
-                </div>
-                <button className="absolute bottom-2 right-2 bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition-colors">
-                  <Camera className="h-4 w-4" />
-                </button>
-              </div>
+              {user.profileImage ? (
+                <img src={user.profileImage} alt="Profile" className="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg" />
+              ) : (
+                <UserIcon className="h-32 w-32 text-gray-400 rounded-full bg-white border-4 border-white shadow-lg" />
+              )}
+              <button className="absolute bottom-2 right-2 bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition-colors">
+                <Camera className="h-4 w-4" />
+              </button>
             </div>
             <div className="absolute top-4 right-4 flex space-x-2">
               {!isEditing ? (

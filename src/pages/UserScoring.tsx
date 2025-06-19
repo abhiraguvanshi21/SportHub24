@@ -1,107 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Users, Clock, MapPin, Eye, Play, Pause, TrendingUp, Filter, Search } from 'lucide-react';
+import { Plus, Users, Clock, MapPin, Eye, Play, TrendingUp, Filter, Search } from 'lucide-react';
+
+type Match = {
+  id: number;
+  title: string;
+  team1: string;
+  team2: string;
+  status: string;
+  scorer: string;
+  venue: string;
+  startTime: string;
+  currentScore?: {
+    team: string;
+    runs: number;
+    wickets: number;
+    overs: number;
+    runRate: number;
+  };
+  finalScore?: {
+    team1Score: string;
+    team2Score: string;
+    result: string;
+  };
+  viewers: number;
+  format: string;
+  isUserMatch: boolean;
+};
+
+// Mock data for user matches
+const mockMatches = [
+  {
+    id: 1,
+    title: "Local Club Championship Final",
+    team1: "Mumbai Warriors",
+    team2: "Delhi Dynamos",
+    status: "Live",
+    scorer: "Rajesh Kumar",
+    venue: "Oval Ground, Mumbai",
+    startTime: "2024-01-15T14:30:00",
+    currentScore: {
+      team: "Mumbai Warriors",
+      runs: 156,
+      wickets: 4,
+      overs: 18.3,
+      runRate: 8.51
+    },
+    viewers: 234,
+    format: "T20",
+    isUserMatch: true
+  },
+  {
+    id: 2,
+    title: "Corporate Cricket League",
+    team1: "TechCorp XI",
+    team2: "Finance United",
+    status: "Live",
+    scorer: "Priya Sharma",
+    venue: "Sports Complex, Bangalore",
+    startTime: "2024-01-15T15:00:00",
+    currentScore: {
+      team: "TechCorp XI",
+      runs: 89,
+      wickets: 2,
+      overs: 12.4,
+      runRate: 7.02
+    },
+    viewers: 156,
+    format: "T20",
+    isUserMatch: true
+  },
+  {
+    id: 3,
+    title: "University Championship",
+    team1: "Engineering College",
+    team2: "Medical College",
+    status: "Completed",
+    scorer: "Mike Thompson",
+    venue: "University Ground, Delhi",
+    startTime: "2024-01-14T10:00:00",
+    finalScore: {
+      team1Score: "187/6 (20 overs)",
+      team2Score: "156/8 (20 overs)",
+      result: "Engineering College won by 31 runs"
+    },
+    viewers: 89,
+    format: "T20",
+    isUserMatch: true
+  },
+  {
+    id: 4,
+    title: "Weekend Warriors League",
+    team1: "Sunset Strikers",
+    team2: "Morning Mavericks",
+    status: "Upcoming",
+    scorer: "Sarah Johnson",
+    venue: "Central Park Ground, Chennai",
+    startTime: "2024-01-16T16:00:00",
+    viewers: 45,
+    format: "ODI",
+    isUserMatch: true
+  },
+  {
+    id: 5,
+    title: "Inter-Society Cricket Match",
+    team1: "Residents XI",
+    team2: "Visitors Team",
+    status: "Live",
+    scorer: "Amit Patel",
+    venue: "Society Ground, Pune",
+    startTime: "2024-01-15T17:00:00",
+    currentScore: {
+      team: "Residents XI",
+      runs: 67,
+      wickets: 1,
+      overs: 8.2,
+      runRate: 8.04
+    },
+    viewers: 78,
+    format: "T20",
+    isUserMatch: true
+  }
+];
 
 const UserScoring = () => {
-  const [matches, setMatches] = useState([]);
-  const [filteredMatches, setFilteredMatches] = useState([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [filterStatus, setFilterStatus] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Mock data for user matches
-  const mockMatches = [
-    {
-      id: 1,
-      title: "Local Club Championship Final",
-      team1: "Mumbai Warriors",
-      team2: "Delhi Dynamos",
-      status: "Live",
-      scorer: "Rajesh Kumar",
-      venue: "Oval Ground, Mumbai",
-      startTime: "2024-01-15T14:30:00",
-      currentScore: {
-        team: "Mumbai Warriors",
-        runs: 156,
-        wickets: 4,
-        overs: 18.3,
-        runRate: 8.51
-      },
-      viewers: 234,
-      format: "T20",
-      isUserMatch: true
-    },
-    {
-      id: 2,
-      title: "Corporate Cricket League",
-      team1: "TechCorp XI",
-      team2: "Finance United",
-      status: "Live",
-      scorer: "Priya Sharma",
-      venue: "Sports Complex, Bangalore",
-      startTime: "2024-01-15T15:00:00",
-      currentScore: {
-        team: "TechCorp XI",
-        runs: 89,
-        wickets: 2,
-        overs: 12.4,
-        runRate: 7.02
-      },
-      viewers: 156,
-      format: "T20",
-      isUserMatch: true
-    },
-    {
-      id: 3,
-      title: "University Championship",
-      team1: "Engineering College",
-      team2: "Medical College",
-      status: "Completed",
-      scorer: "Mike Thompson",
-      venue: "University Ground, Delhi",
-      startTime: "2024-01-14T10:00:00",
-      finalScore: {
-        team1Score: "187/6 (20 overs)",
-        team2Score: "156/8 (20 overs)",
-        result: "Engineering College won by 31 runs"
-      },
-      viewers: 89,
-      format: "T20",
-      isUserMatch: true
-    },
-    {
-      id: 4,
-      title: "Weekend Warriors League",
-      team1: "Sunset Strikers",
-      team2: "Morning Mavericks",
-      status: "Upcoming",
-      scorer: "Sarah Johnson",
-      venue: "Central Park Ground, Chennai",
-      startTime: "2024-01-16T16:00:00",
-      viewers: 45,
-      format: "ODI",
-      isUserMatch: true
-    },
-    {
-      id: 5,
-      title: "Inter-Society Cricket Match",
-      team1: "Residents XI",
-      team2: "Visitors Team",
-      status: "Live",
-      scorer: "Amit Patel",
-      venue: "Society Ground, Pune",
-      startTime: "2024-01-15T17:00:00",
-      currentScore: {
-        team: "Residents XI",
-        runs: 67,
-        wickets: 1,
-        overs: 8.2,
-        runRate: 8.04
-      },
-      viewers: 78,
-      format: "T20",
-      isUserMatch: true
-    }
-  ];
 
   useEffect(() => {
     setMatches(mockMatches);
@@ -129,7 +155,7 @@ const UserScoring = () => {
     setFilteredMatches(filtered);
   }, [matches, filterStatus, searchTerm]);
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Live':
         return 'bg-red-100 text-red-700 border-red-200';
@@ -142,7 +168,7 @@ const UserScoring = () => {
     }
   };
 
-  const formatTime = (timeString) => {
+  const formatTime = (timeString: string) => {
     const date = new Date(timeString);
     return date.toLocaleString();
   };
