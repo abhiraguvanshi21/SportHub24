@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Play, Plus, User, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -26,15 +26,15 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-green-100 sticky top-0 z-50">
+    <header className="bg-white/95 backdrop-blur-sm border-b border-red-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="bg-gradient-to-r from-green-500 to-blue-600 p-2 rounded-lg group-hover:scale-105 transition-transform">
+            <div className="bg-gradient-to-r from-red-500 to-red-700 p-2 rounded-lg group-hover:scale-105 transition-transform">
               <Play className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
               SportHub24
             </span>
           </Link>
@@ -47,8 +47,8 @@ const Header = () => {
                 to={item.path}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                   isActive(item.path)
-                    ? 'text-green-600 bg-green-50 border-b-2 border-green-500'
-                    : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+                    ? 'text-red-600 bg-red-50 border-b-2 border-red-500'
+                    : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
                 }`}
               >
                 {item.name}
@@ -62,7 +62,7 @@ const Header = () => {
               <>
                 <Link
                   to="/add-match"
-                  className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition-all duration-200 flex items-center"
+                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg font-medium hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Match
@@ -72,9 +72,9 @@ const Header = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-green-50 transition-colors"
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-red-50 transition-colors"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-red-700 rounded-full flex items-center justify-center">
                       <User className="h-4 w-4 text-white" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">{user?.name}</span>
@@ -85,7 +85,7 @@ const Header = () => {
                       <Link
                         to="/profile"
                         onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
                       >
                         <User className="h-4 w-4 mr-3" />
                         My Profile
@@ -105,13 +105,13 @@ const Header = () => {
               <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition-all duration-200"
+                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg font-medium hover:from-red-700 hover:to-red-800 transition-all duration-200"
                 >
                   Sign Up
                 </Link>
@@ -122,7 +122,7 @@ const Header = () => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-md text-gray-700 hover:text-green-600 hover:bg-green-50 transition-colors"
+            className="md:hidden p-2 rounded-md text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -131,7 +131,7 @@ const Header = () => {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-sm border-t border-green-100">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-sm border-t border-red-100">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
@@ -139,8 +139,8 @@ const Header = () => {
                   onClick={() => setIsMenuOpen(false)}
                   className={`block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
                     isActive(item.path)
-                      ? 'text-green-600 bg-green-50 border-l-4 border-green-500'
-                      : 'text-gray-700 hover:text-green-600 hover:bg-green-50'
+                      ? 'text-red-600 bg-red-50 border-l-4 border-red-500'
+                      : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
                   }`}
                 >
                   {item.name}
@@ -152,7 +152,7 @@ const Header = () => {
                   <Link
                     to="/add-match"
                     onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-green-600 to-blue-600 text-white"
+                    className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-600 to-red-700 text-white"
                   >
                     <Plus className="h-4 w-4 mr-2 inline" />
                     Add Match
@@ -160,7 +160,7 @@ const Header = () => {
                   <Link
                     to="/profile"
                     onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50"
                   >
                     <User className="h-4 w-4 mr-2 inline" />
                     My Profile
@@ -181,14 +181,14 @@ const Header = () => {
                   <Link
                     to="/login"
                     onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-green-600 hover:bg-green-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50"
                   >
                     Login
                   </Link>
                   <Link
                     to="/signup"
                     onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-green-600 to-blue-600 text-white"
+                    className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-600 to-red-700 text-white"
                   >
                     Sign Up
                   </Link>

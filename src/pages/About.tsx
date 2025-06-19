@@ -1,4 +1,3 @@
-import React from 'react';
 import { Users, Target, Award, Globe, Clock, Shield } from 'lucide-react';
 
 const About = () => {
@@ -35,10 +34,10 @@ const About = () => {
   return (
     <div className="py-16">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-20">
+      <section className="bg-gradient-to-r from-red-600 to-red-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">About SportHub24</h1>
-          <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-red-100 max-w-3xl mx-auto">
             Revolutionizing cricket coverage with cutting-edge technology and passionate expertise
           </p>
         </div>
@@ -62,21 +61,21 @@ const About = () => {
                 cricket viewing experience.
               </p>
               <div className="flex items-center space-x-4">
-                <div className="flex items-center text-green-600">
+                <div className="flex items-center text-red-600">
                   <Target className="h-6 w-6 mr-2" />
                   <span className="font-semibold">Precision</span>
                 </div>
-                <div className="flex items-center text-blue-600">
+                <div className="flex items-center text-red-700">
                   <Shield className="h-6 w-6 mr-2" />
                   <span className="font-semibold">Reliability</span>
                 </div>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-blue-50 p-8 rounded-2xl">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-2xl border border-red-200">
               <div className="grid grid-cols-2 gap-6">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center">
-                    <div className="text-green-600 mb-2 flex justify-center">
+                    <div className="text-red-600 mb-2 flex justify-center">
                       {stat.icon}
                     </div>
                     <div className="text-2xl font-bold text-gray-900 mb-1">{stat.number}</div>
@@ -90,7 +89,7 @@ const About = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-16 bg-gradient-to-r from-slate-50 to-green-50">
+      <section className="py-16 bg-gradient-to-r from-slate-50 to-red-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">What We Offer</h2>
@@ -98,8 +97,8 @@ const About = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-green-600 mb-4">
+            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-red-100">
+              <div className="text-red-600 mb-4">
                 <Clock className="h-10 w-10" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Live Scoring</h3>
@@ -108,8 +107,8 @@ const About = () => {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-blue-600 mb-4">
+            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-red-100">
+              <div className="text-red-700 mb-4">
                 <Globe className="h-10 w-10" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Live Video Commentary</h3>
@@ -118,8 +117,8 @@ const About = () => {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-orange-600 mb-4">
+            <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-red-100">
+              <div className="text-red-800 mb-4">
                 <Users className="h-10 w-10" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Custom Scoring Services</h3>
@@ -142,11 +141,11 @@ const About = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, index) => (
               <div key={index} className="text-center group">
-                <div className="bg-gradient-to-br from-green-100 to-blue-100 w-32 h-32 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Users className="h-16 w-16 text-green-600" />
+                <div className="bg-gradient-to-br from-red-100 to-red-200 w-32 h-32 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-105 transition-transform border border-red-300">
+                  <Users className="h-16 w-16 text-red-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>
-                <p className="text-green-600 font-medium mb-3">{member.role}</p>
+                <p className="text-red-600 font-medium mb-3">{member.role}</p>
                 <p className="text-gray-600 text-sm">{member.description}</p>
               </div>
             ))}

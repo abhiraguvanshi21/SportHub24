@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Lock, Phone, Calendar, Eye, EyeOff, UserPlus, AlertCircle } from 'lucide-react';
+import { User, Mail, Lock, EyeOff, UserPlus, AlertCircle, Eye } from 'lucide-react';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +35,6 @@ const Signup = () => {
     setIsLoading(true);
     setError('');
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
@@ -63,11 +62,11 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center mb-4">
             <UserPlus className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Join SportHub24</h2>
@@ -75,7 +74,7 @@ const Signup = () => {
         </div>
 
         {/* Signup Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-red-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
@@ -98,7 +97,7 @@ const Signup = () => {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -117,83 +116,10 @@ const Signup = () => {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                     placeholder="Enter your email"
                   />
                 </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="playingRole" className="block text-sm font-medium text-gray-700 mb-2">
-                  Playing Role
-                </label>
-                <select
-                  id="playingRole"
-                  name="playingRole"
-                  value={formData.playingRole}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                >
-                  <option value="Not specified">Not specified</option>
-                  <option value="Batsman">Batsman</option>
-                  <option value="Bowler">Bowler</option>
-                  <option value="All-rounder">All-rounder</option>
-                  <option value="Wicket-keeper">Wicket-keeper</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="favoriteTeam" className="block text-sm font-medium text-gray-700 mb-2">
-                  Favorite Team
-                </label>
-                <input
-                  id="favoriteTeam"
-                  name="favoriteTeam"
-                  type="text"
-                  value={formData.favoriteTeam}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                  placeholder="e.g., Mumbai Indians"
-                />
               </div>
             </div>
 
@@ -211,7 +137,7 @@ const Signup = () => {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                     placeholder="Create a password"
                   />
                   <button
@@ -237,7 +163,7 @@ const Signup = () => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                     placeholder="Confirm your password"
                   />
                   <button
@@ -257,15 +183,15 @@ const Signup = () => {
                 name="terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
               />
               <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
                 I agree to the{' '}
-                <Link to="/terms" className="text-green-600 hover:text-green-500">
+                <Link to="/terms" className="text-red-600 hover:text-red-500">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link to="/privacy" className="text-green-600 hover:text-green-500">
+                <Link to="/privacy" className="text-red-600 hover:text-red-500">
                   Privacy Policy
                 </Link>
               </label>
@@ -274,7 +200,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -290,7 +216,7 @@ const Signup = () => {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Already have an account?{' '}
-              <Link to="/login" className="text-green-600 hover:text-green-500 font-medium">
+              <Link to="/login" className="text-red-600 hover:text-red-500 font-medium">
                 Sign in here
               </Link>
             </p>
