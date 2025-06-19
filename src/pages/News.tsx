@@ -1,99 +1,402 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Clock, TrendingUp, Search, Filter, Eye, MessageCircle, Share2, Bookmark } from 'lucide-react';
+
+interface NewsArticle {
+  id: string;
+  title: string;
+  summary: string;
+  content: string;
+  category: 'breaking' | 'match-report' | 'transfer' | 'analysis' | 'interview' | 'stats' | 'upcoming';
+  timestamp: string;
+  author: string;
+  image: string;
+  views: number;
+  comments: number;
+  tags: string[];
+  isBreaking?: boolean;
+  isFeatured?: boolean;
+}
+
+interface LiveUpdate {
+  id: string;
+  text: string;
+  timestamp: string;
+  type: 'score' | 'wicket' | 'boundary' | 'milestone' | 'news';
+  match?: string;
+}
 
 const News = () => {
-  const [latestNews] = useState([
-    {
-      id: 1,
-      title: 'India announces squad for Zimbabwe T20Is',
-      time: '10m ago',
-      points: [
-        'Ruturaj Gaikwad to lead the side.',
-        'Several IPL performers included.',
-        'No senior players like Kohli or Rohit.'
-      ]
-    },
-    {
-      id: 2,
-      title: 'England finalize squad for India Test series',
-      time: '30m ago',
-      points: [
-        'Anderson rested for the first two Tests.',
-        'Stokes returns after injury layoff.',
-        'Crawley named as vice-captain.'
-      ]
-    },
-    {
-      id: 3,
-      title: 'Pakistan appoints Gary Kirsten as head coach',
-      time: '1h ago',
-      points: [
-        'Kirsten signs 2-year contract.',
-        'Focus on ODI and T20 World Cup prep.',
-        'PCB shows confidence in his experience.'
-      ]
-    },
-    {
-      id: 4,
-      title: 'Sri Lanka thrash South Africa in warm-up match',
-      time: '2h ago',
-      points: [
-        'Sri Lanka chased 189 with 7 wickets in hand.',
-        'Nissanka scored a quickfire 78.',
-        'Bowling unit clicked early.'
-      ]
-    }
-  ]);
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
+  const [filteredArticles, setFilteredArticles] = useState<NewsArticle[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  const featuredStories = [
+  // Latest 2025 sports news articles
+  const mockArticles: NewsArticle[] = [
     {
-      title: 'The duality of being Kagiso Rabada, home and away',
-      image: 'https://www.cricbuzz.com/a/img/v1/600x400/i1/c378148/20240608053058.jpeg',
-      description: 'Rabada’s journey through tough conditions and home dominance shows his evolution as South Africa’s pace spearhead.',
+      id: '1',
+      title: 'ICC Champions Trophy 2025: India Squad Announced with Rohit as Captain',
+      summary: 'BCCI announces a 15-member squad for the Champions Trophy 2025 in Pakistan with Virat Kohli returning as captain after the T20 World Cup triumph.',
+      content: 'The Board of Control for Cricket in India has announced a strong 15-member squad for the ICC Champions Trophy 2025...',
+      category: 'breaking',
+      timestamp: '2025-01-15T10:30:00Z',
+      author: 'Rajesh Kumar',
+      image: 'https://news24online.com/wp-content/uploads/2025/01/Untitled-design-96.jpg',
+      views: 25420,
+      comments: 334,
+      tags: ['India', 'Champions Trophy', 'Squad', 'Kohli', '2025'],
+      isBreaking: true,
+      isFeatured: true
     },
     {
-      title: 'Pat Cummins scripts world record: 5-wicket haul in ICC final',
-      image: 'https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1GAi8r.img?w=768&h=432&m=6&x=560&y=145&s=145&d=145',
-      description: 'Cummins becomes the first captain to take a 5-wicket haul in an ICC final, leading Australia to another world title.',
+      id: '2',
+      title: 'IPL 2025 Mega Auction: Record-Breaking ₹27 Crore Bid for Star Pant',
+      summary: 'The IPL 2025 mega auction sees unprecedented bidding wars with a mystery Batsman fetching the highest price in IPL history.',
+      content: 'In a thrilling bidding war that lasted over 15 minutes, the mystery player became the most expensive...',
+      category: 'transfer',
+      timestamp: '2025-01-14T15:45:00Z',
+      author: 'Priya Sharma',
+      image: 'https://news24online.com/wp-content/uploads/2024/12/Rishabh-Pant-4.jpg',
+      views: 18900,
+      comments: 289,
+      tags: ['IPL', 'Auction', '2025', 'Transfer', 'Record'],
+      isFeatured: true
     },
     {
-      title: 'Kohli’s legacy: Unmatched hunger across all formats',
-      image: 'data:image/webp;base64,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',
-      description: 'Virat Kohli continues to shine in all formats. His consistency and intensity remain unmatched in modern cricket.',
+      id: '3',
+      title: 'England vs Australia: Ashes 2025 Schedule Revealed',
+      summary: 'Cricket Australia announces the complete schedule for the Ashes 2025 series with five Tests across iconic venues.',
+      content: 'The much-anticipated Ashes 2025 series will commence on November 21, 2025, at the Gabba...',
+      category: 'upcoming',
+      timestamp: '2025-01-14T12:20:00Z',
+      author: 'Mike Thompson',
+      image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%3Fid%3DOIF.%252fQKXZvohLLbS5nWbVtlF2Q%26r%3D0%26pid%3DApi&f=1&ipt=a5c235c67d9c0b1fbb775e2e7f766494813e0609ace499f9c99fdee31eebe60c&ipo=images',
+      views: 14567,
+      comments: 198,
+      tags: ['Ashes', '2025', 'England', 'Australia', 'Schedule']
     }
   ];
 
-  return (
-    <div className="max-w-7xl mx-auto p-6 grid md:grid-cols-3 gap-6">
-      {/* Latest News */}
-      <div className="col-span-1">
-        <h2 className="text-xl font-bold mb-4">🗞️ Latest News</h2>
-        <ul className="space-y-6">
-          {latestNews.map(item => (
-            <li key={item.id} className="border-b pb-4">
-              <div className="font-medium text-base">{item.title}</div>
-              <div className="text-gray-400 text-xs mb-2">{item.time}</div>
-              <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
-                {item.points.map((point, idx) => (
-                  <li key={idx}>{point}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      </div>
+  // Live updates for 2025
+  const mockLiveUpdates: LiveUpdate[] = [
+    {
+      id: '1',
+      text: 'BREAKING: Virat Kohli named captain for Champions Trophy 2025 squad announcement',
+      timestamp: '2025-01-15T11:45:00Z',
+      type: 'news'
+    },
+    {
+      id: '2',
+      text: 'IPL 2025 Auction: Mystery player sold for record ₹27 crores to Mumbai Indians',
+      timestamp: '2025-01-15T11:30:00Z',
+      type: 'news'
+    }
+  ];
 
-      {/* Featured Stories */}
-      <div className="col-span-2 space-y-8">
-        <h2 className="text-xl font-bold mb-4">🌍 Featured Stories</h2>
-        {featuredStories.map((story, index) => (
-          <div key={index} className="bg-white shadow rounded overflow-hidden">
-            <img src={story.image} alt={story.title} className="w-full h-64 object-cover" />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">{story.title}</h3>
-              <p className="text-gray-600 mt-2">{story.description}</p>
+  useEffect(() => {
+    setArticles(mockArticles);
+    setLiveUpdates(mockLiveUpdates);
+    setFilteredArticles(mockArticles);
+
+    // Update time every minute
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+
+    return () => {
+      clearInterval(timeInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    let filtered = articles;
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(article => article.category === selectedCategory);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(article =>
+        article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    setFilteredArticles(filtered);
+  }, [articles, selectedCategory, searchTerm]);
+
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'breaking': return 'bg-red-100 text-red-700 border-red-200';
+      case 'match-report': return 'bg-red-100 text-red-700 border-red-200';
+      case 'transfer': return 'bg-red-200 text-red-800 border-red-300';
+      case 'analysis': return 'bg-red-100 text-red-700 border-red-200';
+      case 'interview': return 'bg-red-200 text-red-800 border-red-300';
+      case 'stats': return 'bg-red-100 text-red-700 border-red-200';
+      case 'upcoming': return 'bg-red-200 text-red-800 border-red-300';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const categories = [
+    { id: 'all', label: 'All News', count: articles.length },
+    { id: 'breaking', label: 'Breaking', count: articles.filter(a => a.category === 'breaking').length },
+    { id: 'upcoming', label: 'Upcoming Events', count: articles.filter(a => a.category === 'upcoming').length },
+    { id: 'match-report', label: 'Match Reports', count: articles.filter(a => a.category === 'match-report').length },
+    { id: 'transfer', label: 'Transfers', count: articles.filter(a => a.category === 'transfer').length },
+    { id: 'analysis', label: 'Analysis', count: articles.filter(a => a.category === 'analysis').length }
+  ];
+
+  return (
+    <div className="py-16">
+      {/* Header */}
+      <section className="bg-gradient-to-r from-red-600 to-red-800 text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Cricket News Hub 2025</h1>
+            <p className="text-xl md:text-2xl text-red-100 max-w-3xl mx-auto mb-8">
+              Latest cricket news, upcoming tournaments, and comprehensive coverage of the 2025 cricket season
+            </p>
+            <div className="flex items-center justify-center space-x-4 text-red-100">
+              <div className="flex items-center">
+                <Clock className="h-5 w-5 mr-2" />
+                <span>Last updated: {currentTime.toLocaleTimeString()}</span>
+              </div>
+              <div className="flex items-center">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                <span>Live Updates Active</span>
+              </div>
             </div>
           </div>
-        ))}
+        </div>
+      </section>
+
+      {/* Breaking News Ticker */}
+      <section className="bg-red-600 text-white py-3 overflow-hidden">
+        <div className="flex items-center">
+          <div className="bg-red-800 px-4 py-2 font-bold text-sm whitespace-nowrap">
+            BREAKING NEWS 2025
+          </div>
+          <div className="flex animate-scroll">
+            <span className="px-8 text-sm">
+              🚨 Champions Trophy 2025: India squad announced with Rohit as captain
+            </span>
+            <span className="px-8 text-sm">
+              🏏 IPL 2025 Mega Auction: Record ₹27 crore bid breaks all previous records
+            </span>
+            <span className="px-8 text-sm">
+              🎯 Ashes 2025: Complete schedule released, series starts November at Gabba
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {/* Search and Filters */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-red-100">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <input
+                    type="text"
+                    placeholder="Search 2025 cricket news..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Filter className="h-5 w-5 text-gray-500" />
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  >
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.label} ({category.count})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Articles */}
+            {filteredArticles.filter(article => article.isFeatured).length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured Stories 2025</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {filteredArticles.filter(article => article.isFeatured).slice(0, 2).map((article) => (
+                    <div key={article.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group border border-red-100">
+                      <div className="relative">
+                        <img 
+                          src={article.image} 
+                          alt={article.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-4 left-4 flex space-x-2">
+                          {article.isBreaking && (
+                            <span className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+                              BREAKING
+                            </span>
+                          )}
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getCategoryColor(article.category)}`}>
+                            <span className="ml-1 capitalize">{article.category.replace('-', ' ')}</span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
+                          {article.title}
+                        </h3>
+                        <p className="text-gray-600 mb-4 line-clamp-2">{article.summary}</p>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <div className="flex items-center space-x-4">
+                            <span>{article.author}</span>
+                            <span>{formatTimeAgo(article.timestamp)}</span>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <div className="flex items-center">
+                              <Eye className="h-4 w-4 mr-1" />
+                              <span>{article.views.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center">
+                              <MessageCircle className="h-4 w-4 mr-1" />
+                              <span>{article.comments}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* All Articles */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Latest Cricket News 2025</h2>
+              <div className="space-y-6">
+                {filteredArticles.map((article) => (
+                  <div key={article.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group border border-red-100">
+                    <div className="md:flex">
+                      <div className="md:w-1/3">
+                        <img 
+                          src={article.image} 
+                          alt={article.title}
+                          className="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="md:w-2/3 p-6">
+                        <div className="flex items-center space-x-2 mb-3">
+                          {article.isBreaking && (
+                            <span className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+                              BREAKING
+                            </span>
+                          )}
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getCategoryColor(article.category)}`}>
+                            <span className="ml-1 capitalize">{article.category.replace('-', ' ')}</span>
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
+                          {article.title}
+                        </h3>
+                        <p className="text-gray-600 mb-4">{article.summary}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <span>{article.author}</span>
+                            <span>{formatTimeAgo(article.timestamp)}</span>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Eye className="h-4 w-4 mr-1" />
+                              <span>{article.views.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <MessageCircle className="h-4 w-4 mr-1" />
+                              <span>{article.comments}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                                <Bookmark className="h-4 w-4" />
+                              </button>
+                              <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                                <Share2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Live Updates */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-red-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900">Live Updates 2025</h3>
+                <div className="flex items-center text-red-600">
+                  <div className="w-2 h-2 bg-red-600 rounded-full mr-2 animate-pulse"></div>
+                  <span className="text-sm font-medium">LIVE</span>
+                </div>
+              </div>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {liveUpdates.map((update) => (
+                  <div key={update.id} className="border-l-4 border-red-500 pl-4 py-2">
+                    <div className="flex items-start space-x-2">
+                      <span className="text-lg">📰</span>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-900 font-medium">{update.text}</p>
+                        <span className="text-xs text-gray-500">{formatTimeAgo(update.timestamp)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Newsletter Signup */}
+            <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-xl shadow-lg p-6 text-white">
+              <h3 className="text-lg font-bold mb-2">Stay Updated with 2025 Cricket</h3>
+              <p className="text-red-100 text-sm mb-4">Get the latest cricket news and tournament updates delivered to your inbox</p>
+              <div className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full px-3 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
+                />
+                <button className="w-full bg-white text-red-600 py-2 px-4 rounded-lg font-medium hover:bg-red-50 transition-colors">
+                  Subscribe to 2025 Updates
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -46,11 +46,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center mb-4">
             <LogIn className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
@@ -58,7 +58,7 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-red-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
@@ -80,7 +80,7 @@ const Login = () => {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                   placeholder="Enter your email"
                 />
               </div>
@@ -99,7 +99,7 @@ const Login = () => {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
                   placeholder="Enter your password"
                 />
                 <button
@@ -118,13 +118,13 @@ const Login = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Remember me
                 </label>
               </div>
-              <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-500">
+              <Link to="/forgot-password" className="text-sm text-red-600 hover:text-red-500">
                 Forgot password?
               </Link>
             </div>
@@ -132,7 +132,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 px-4 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -148,7 +148,7 @@ const Login = () => {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <Link to="/signup" className="text-green-600 hover:text-green-500 font-medium">
+              <Link to="/signup" className="text-red-600 hover:text-red-500 font-medium">
                 Sign up here
               </Link>
             </p>
@@ -156,9 +156,9 @@ const Login = () => {
         </div>
 
         {/* Demo Credentials */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials</h3>
-          <p className="text-xs text-blue-700">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-red-900 mb-2">Demo Credentials</h3>
+          <p className="text-xs text-red-700">
             Email: demo@sporthub24.com<br />
             Password: demo123
           </p>
