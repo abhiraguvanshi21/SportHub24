@@ -375,7 +375,7 @@ const UserScoring = () => {
             Join our community of cricket scorers and share your matches with fellow cricket enthusiasts
           </p>
           <Link
-            to="/add-match"
+            to="/AddMatch"
             className="bg-white text-red-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-red-50 transition-all duration-200 inline-flex items-center"
           >
             <Plus className="h-5 w-5 mr-2" />
