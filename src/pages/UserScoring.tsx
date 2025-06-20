@@ -1,8 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Users, Clock, MapPin, Eye, Play, TrendingUp, Filter, Search } from 'lucide-react';
+import { Plus, Users, Clock, MapPin, Eye, Play, TrendingUp, Filter, Search, Video, Trophy } from 'lucide-react';
 
-type Match = {
+interface BallByBall {
+  over: number;
+  ball: number;
+  runs: number;
+  description: string;
+  timestamp: string;
+}
+
+interface CurrentScore {
+  runs: number;
+  wickets: number;
+  overs: number;
+  balls: number;
+  runRate: number;
+}
+
+interface FinalScore {
+  team1Score: string;
+  team2Score: string;
+  result: string;
+}
+
+interface Match {
   id: number;
   title: string;
   team1: string;
@@ -11,126 +33,101 @@ type Match = {
   scorer: string;
   venue: string;
   startTime: string;
-  currentScore?: {
-    team: string;
-    runs: number;
-    wickets: number;
-    overs: number;
-    runRate: number;
-  };
-  finalScore?: {
-    team1Score: string;
-    team2Score: string;
-    result: string;
-  };
-  viewers: number;
+  currentScore?: CurrentScore;
+  finalScore?: FinalScore;
+  viewers?: number;
   format: string;
   isUserMatch: boolean;
-};
-
-const mockMatches: Match[] = [
-  {
-    id: 1,
-    title: "Local Club Championship Final",
-    team1: "Mumbai Warriors",
-    team2: "Delhi Dynamos",
-    status: "Live",
-    scorer: "Rajesh Kumar",
-    venue: "Oval Ground, Mumbai",
-    startTime: "2024-01-15T14:30:00",
-    currentScore: {
-      team: "Mumbai Warriors",
-      runs: 156,
-      wickets: 4,
-      overs: 18.3,
-      runRate: 8.51
-    },
-    viewers: 234,
-    format: "T20",
-    isUserMatch: true
-  },
-  {
-    id: 2,
-    title: "Corporate Cricket League",
-    team1: "TechCorp XI",
-    team2: "Finance United",
-    status: "Live",
-    scorer: "Priya Sharma",
-    venue: "Sports Complex, Bangalore",
-    startTime: "2024-01-15T15:00:00",
-    currentScore: {
-      team: "TechCorp XI",
-      runs: 89,
-      wickets: 2,
-      overs: 12.4,
-      runRate: 7.02
-    },
-    viewers: 156,
-    format: "T20",
-    isUserMatch: true
-  },
-  {
-    id: 3,
-    title: "University Championship",
-    team1: "Engineering College",
-    team2: "Medical College",
-    status: "Completed",
-    scorer: "Mike Thompson",
-    venue: "University Ground, Delhi",
-    startTime: "2024-01-14T10:00:00",
-    finalScore: {
-      team1Score: "187/6 (20 overs)",
-      team2Score: "156/8 (20 overs)",
-      result: "Engineering College won by 31 runs"
-    },
-    viewers: 89,
-    format: "T20",
-    isUserMatch: true
-  },
-  {
-    id: 4,
-    title: "Weekend Warriors League",
-    team1: "Sunset Strikers",
-    team2: "Morning Mavericks",
-    status: "Upcoming",
-    scorer: "Sarah Johnson",
-    venue: "Central Park Ground, Chennai",
-    startTime: "2024-01-16T16:00:00",
-    viewers: 45,
-    format: "ODI",
-    isUserMatch: true
-  },
-  {
-    id: 5,
-    title: "Inter-Society Cricket Match",
-    team1: "Residents XI",
-    team2: "Visitors Team",
-    status: "Live",
-    scorer: "Amit Patel",
-    venue: "Society Ground, Pune",
-    startTime: "2024-01-15T17:00:00",
-    currentScore: {
-      team: "Residents XI",
-      runs: 67,
-      wickets: 1,
-      overs: 8.2,
-      runRate: 8.04
-    },
-    viewers: 78,
-    format: "T20",
-    isUserMatch: true
-  }
-];
+  ballByBall?: BallByBall[];
+}
 
 const UserScoring = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
-  const [filterStatus, setFilterStatus] = useState<string>('All');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
 
+  // Load matches from localStorage and mock data
   useEffect(() => {
-    setMatches(mockMatches);
-    setFilteredMatches(mockMatches);
+    const storedMatches = JSON.parse(localStorage.getItem('userMatches') || '[]');
+    
+    // Mock data for demonstration
+    const mockMatches = [
+      {
+        id: 1,
+        title: "Local Club Championship Final",
+        team1: "Mumbai Warriors",
+        team2: "Delhi Dynamos",
+        status: "Live",
+        scorer: "Rajesh Kumar",
+        venue: "Oval Ground, Mumbai",
+        startTime: "2024-01-15T14:30:00",
+        currentScore: {
+          runs: 156,
+          wickets: 4,
+          overs: 18,
+          balls: 3,
+          runRate: 8.51
+        },
+        viewers: 234,
+        format: "T20",
+        isUserMatch: true,
+        ballByBall: [
+          { over: 18, ball: 1, runs: 1, description: "1 run to Sharma", timestamp: "14:45:30" },
+          { over: 18, ball: 2, runs: 4, description: "FOUR! Beautiful cover drive", timestamp: "14:46:15" },
+          { over: 18, ball: 3, runs: 0, description: "Dot ball, good bowling", timestamp: "14:47:00" }
+        ]
+      },
+      {
+        id: 2,
+        title: "Corporate Cricket League",
+        team1: "TechCorp XI",
+        team2: "Finance United",
+        status: "Live",
+        scorer: "Priya Sharma",
+        venue: "Sports Complex, Bangalore",
+        startTime: "2024-01-15T15:00:00",
+        currentScore: {
+          runs: 89,
+          wickets: 2,
+          overs: 12,
+          balls: 4,
+          runRate: 7.02
+        },
+        viewers: 156,
+        format: "T20",
+        isUserMatch: true,
+        ballByBall: [
+          { over: 12, ball: 1, runs: 2, description: "2 runs to Kumar", timestamp: "15:30:45" },
+          { over: 12, ball: 2, runs: 0, description: "Dot ball", timestamp: "15:31:20" },
+          { over: 12, ball: 3, runs: 6, description: "SIX! Over the boundary", timestamp: "15:32:10" },
+          { over: 12, ball: 4, runs: 1, description: "Single taken", timestamp: "15:32:55" }
+        ]
+      },
+      {
+        id: 3,
+        title: "University Championship",
+        team1: "Engineering College",
+        team2: "Medical College",
+        status: "Completed",
+        scorer: "Mike Thompson",
+        venue: "University Ground, Delhi",
+        startTime: "2024-01-14T10:00:00",
+        finalScore: {
+          team1Score: "187/6 (20 overs)",
+          team2Score: "156/8 (20 overs)",
+          result: "Engineering College won by 31 runs"
+        },
+        viewers: 89,
+        format: "T20",
+        isUserMatch: true
+      }
+    ];
+
+    // Combine stored matches with mock data
+    const allMatches = [...storedMatches, ...mockMatches];
+    setMatches(allMatches);
+    setFilteredMatches(allMatches);
   }, []);
 
   useEffect(() => {
@@ -178,7 +175,7 @@ const UserScoring = () => {
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Community Matches</h1>
             <p className="text-xl md:text-2xl text-red-100 max-w-3xl mx-auto mb-8">
-              Discover live cricket matches scored by our community members
+              Discover live cricket matches scored by our community members with real-time updates
             </p>
             <Link
               to="/add-match"
@@ -247,7 +244,7 @@ const UserScoring = () => {
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg text-center border border-red-100">
               <div className="text-3xl font-bold text-red-600 mb-2">
-                {matches.reduce((sum, match) => sum + match.viewers, 0)}
+                {matches.reduce((sum, match) => sum + (match.viewers || 0), 0)}
               </div>
               <div className="text-gray-600">Total Viewers</div>
             </div>
@@ -280,11 +277,16 @@ const UserScoring = () => {
                   <div className="p-6 border-b border-red-100">
                     <div className="flex justify-between items-start mb-4">
                       <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{match.title}</h3>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(match.status)} ${
-                        match.status === 'Live' ? 'animate-pulse' : ''
-                      }`}>
-                        {match.status}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(match.status)} ${
+                          match.status === 'Live' ? 'animate-pulse' : ''
+                        }`}>
+                          {match.status}
+                        </span>
+                        {match.status === 'Live' && (
+                          <Video className="h-4 w-4 text-red-600" />
+                        )}
+                      </div>
                     </div>
                     
                     <div className="text-xl font-bold text-gray-900 mb-2">
@@ -298,7 +300,7 @@ const UserScoring = () => {
                       </div>
                       <div className="flex items-center">
                         <Eye className="h-4 w-4 mr-1" />
-                        <span>{match.viewers}</span>
+                        <span>{match.viewers || 0}</span>
                       </div>
                     </div>
                   </div>
@@ -321,8 +323,18 @@ const UserScoring = () => {
                           {match.currentScore.runs}/{match.currentScore.wickets}
                         </div>
                         <div className="text-sm text-red-600">
-                          ({match.currentScore.overs} overs) • RR: {match.currentScore.runRate}
+                          ({Math.floor(match.currentScore.balls / 6)}.{match.currentScore.balls % 6} overs) • RR: {match.currentScore.runRate}
                         </div>
+                        
+                        {/* Latest Ball Commentary */}
+                        {match.ballByBall && match.ballByBall.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-red-200">
+                            <div className="text-xs text-red-600 mb-1">Latest:</div>
+                            <div className="text-sm text-red-800">
+                              {match.ballByBall[match.ballByBall.length - 1].description}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -374,13 +386,22 @@ const UserScoring = () => {
           <p className="text-xl mb-8 text-red-100">
             Join our community of cricket scorers and share your matches with fellow cricket enthusiasts
           </p>
-          <Link
-            to="/AddMatch"
-            className="bg-white text-red-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-red-50 transition-all duration-200 inline-flex items-center"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Start Scoring Now
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/add-match"
+              className="bg-white text-red-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-red-50 transition-all duration-200 inline-flex items-center"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Start Scoring Now
+            </Link>
+            <Link
+              to="/live-scoring"
+              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-red-600 transition-all duration-200 inline-flex items-center"
+            >
+              <Trophy className="h-5 w-5 mr-2" />
+              Watch Professional Matches
+            </Link>
+          </div>
         </div>
       </section>
     </div>

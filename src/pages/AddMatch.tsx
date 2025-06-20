@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Save, Users, Trophy, Play, 
   Video, VideoOff, Camera, Activity,
-  RotateCcw, Square} from 'lucide-react';
+  RotateCcw, Square, 
+  UserPlus} from 'lucide-react';
 
 const AddMatch = () => {
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const viewerIntervalRef = useRef<NodeJS.Timeout | null>(null); // Track interval for cleanup
   const [currentStep, setCurrentStep] = useState(1);
-
+  
   const [matchData, setMatchData] = useState({
     title: '',
     team1: '',
@@ -26,15 +26,6 @@ const AddMatch = () => {
     scorerName: '',
     contactInfo: ''
   });
-
-  type BallByBallEntry = {
-    over: number;
-    ball: number;
-    runs: number;
-    description: string;
-    timestamp: string;
-    isWicket?: boolean;
-  };
 
   type Batsman = {
     name: string;
@@ -56,6 +47,17 @@ const AddMatch = () => {
     ballsBowled: number;
   };
 
+  type BallByBall = {
+    over: number;
+    ball: number;
+    runs: number;
+    description: string;
+    timestamp: string;
+    bowler?: string;
+    batsman?: string;
+    isWicket?: boolean;
+  };
+
   type LiveScoring = {
     isLive: boolean;
     currentInnings: number;
@@ -71,8 +73,13 @@ const AddMatch = () => {
     };
     currentBatsmen: Batsman[];
     currentBowler: Bowler;
-    ballByBall: BallByBallEntry[];
+    ballByBall: BallByBall[];
     lastBalls: (number | string)[];
+    overHistory: BallByBall[];
+    bowlerHistory: Bowler[];
+    needNewBatsman: boolean;
+    needNewBowler: boolean;
+    availableBowlers: string[];
   };
 
   const [liveScoring, setLiveScoring] = useState<LiveScoring>({
@@ -118,7 +125,12 @@ const AddMatch = () => {
       ballsBowled: 0
     },
     ballByBall: [],
-    lastBalls: []
+    lastBalls: [],
+    overHistory: [],
+    bowlerHistory: [],
+    needNewBatsman: false,
+    needNewBowler: false,
+    availableBowlers: []
   });
 
   const [videoStream, setVideoStream] = useState({
@@ -139,6 +151,10 @@ const AddMatch = () => {
     bitrate: 2500
   });
 
+  const [showNewBatsmanModal, setShowNewBatsmanModal] = useState(false);
+  const [showNewBowlerModal, setShowNewBowlerModal] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+
   // Video streaming functions
   const startVideoStream = async () => {
     try {
@@ -154,7 +170,7 @@ const AddMatch = () => {
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
-
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
@@ -166,9 +182,7 @@ const AddMatch = () => {
         hasAudio: stream.getAudioTracks().length > 0
       }));
 
-      // Simulate viewer count increase
-      if (viewerIntervalRef.current) clearInterval(viewerIntervalRef.current);
-      viewerIntervalRef.current = setInterval(() => {
+      setInterval(() => {
         setVideoStream(prev => ({
           ...prev,
           viewers: prev.viewers + Math.floor(Math.random() * 3)
@@ -186,7 +200,7 @@ const AddMatch = () => {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-
+    
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
@@ -196,14 +210,8 @@ const AddMatch = () => {
       isStreaming: false,
       isRecording: false,
       hasVideo: false,
-      hasAudio: false,
-      viewers: 0
+      hasAudio: false
     }));
-
-    if (viewerIntervalRef.current) {
-      clearInterval(viewerIntervalRef.current);
-      viewerIntervalRef.current = null;
-    }
   };
 
   const toggleRecording = () => {
@@ -237,80 +245,160 @@ const AddMatch = () => {
     }));
   };
 
+  const addNewBatsman = () => {
+    if (!newPlayerName.trim()) return;
+    
+    setLiveScoring(prev => {
+      const newBatsmen = [...prev.currentBatsmen];
+      const outBatsmanIndex = newBatsmen.findIndex(b => !b.isOnStrike);
+      
+      if (outBatsmanIndex !== -1) {
+        newBatsmen[outBatsmanIndex] = {
+          name: newPlayerName,
+          runs: 0,
+          balls: 0,
+          fours: 0,
+          sixes: 0,
+          strikeRate: 0,
+          isOnStrike: false
+        };
+      }
+      
+      return {
+        ...prev,
+        currentBatsmen: newBatsmen,
+        needNewBatsman: false
+      };
+    });
+    
+    setNewPlayerName('');
+    setShowNewBatsmanModal(false);
+  };
+
+  const addNewBowler = () => {
+    if (!newPlayerName.trim()) return;
+    
+    setLiveScoring(prev => {
+      const newBowlerHistory = [...(prev.bowlerHistory || []), prev.currentBowler];
+      const newAvailableBowlers = [...(prev.availableBowlers || []), prev.currentBowler.name].filter(name => name);
+      
+      return {
+        ...prev,
+        currentBowler: {
+          name: newPlayerName,
+          overs: 0,
+          maidens: 0,
+          runs: 0,
+          wickets: 0,
+          economy: 0,
+          ballsBowled: 0
+        },
+        bowlerHistory: newBowlerHistory,
+        availableBowlers: newAvailableBowlers,
+        needNewBowler: false
+      };
+    });
+    
+    setNewPlayerName('');
+    setShowNewBowlerModal(false);
+  };
+
+  const selectExistingBowler = (bowlerName: string) => {
+    const existingBowler = liveScoring.bowlerHistory.find(b => b.name === bowlerName);
+    if (existingBowler) {
+      setLiveScoring(prev => ({
+        ...prev,
+        currentBowler: { ...existingBowler },
+        needNewBowler: false
+      }));
+    }
+    setShowNewBowlerModal(false);
+  };
+
   const addRuns = (runs: number, isExtra = false, extraType = '') => {
     const onStrikeBatsmanIndex = liveScoring.currentBatsmen.findIndex(b => b.isOnStrike);
-
+    
     setLiveScoring(prev => {
       const newScore = { ...prev.currentScore };
       const newBatsmen = [...prev.currentBatsmen];
       const newBowler = { ...prev.currentBowler };
-
+      
       // Update score
       newScore.runs += runs;
       if (isExtra) {
         newScore.extras += runs;
       }
-
+      
       // Update batsman (only if not extra)
       if (!isExtra && onStrikeBatsmanIndex !== -1) {
         newBatsmen[onStrikeBatsmanIndex].runs += runs;
         newBatsmen[onStrikeBatsmanIndex].balls += 1;
-
+        
         // Update boundaries
         if (runs === 4) newBatsmen[onStrikeBatsmanIndex].fours += 1;
         if (runs === 6) newBatsmen[onStrikeBatsmanIndex].sixes += 1;
-
+        
         // Calculate strike rate
         newBatsmen[onStrikeBatsmanIndex].strikeRate = 
-          newBatsmen[onStrikeBatsmanIndex].balls > 0
-            ? ((newBatsmen[onStrikeBatsmanIndex].runs / newBatsmen[onStrikeBatsmanIndex].balls) * 100).toFixed(1)
-            : 0;
+          (newBatsmen[onStrikeBatsmanIndex].runs / newBatsmen[onStrikeBatsmanIndex].balls * 100).toFixed(1);
       }
-
+      
       // Update bowler
       newBowler.runs += runs;
+      let needNewBowler = false;
+      
       if (!isExtra) {
         newBowler.ballsBowled += 1;
         newScore.balls += 1;
-
+        
         // Check if over is complete
-        if (newScore.balls % 6 === 0 && newScore.balls > 0) {
+        if (newScore.balls % 6 === 0) {
           newScore.overs = Math.floor(newScore.balls / 6);
           // Switch strike at end of over
           newBatsmen.forEach(batsman => {
             batsman.isOnStrike = !batsman.isOnStrike;
           });
+          // Need new bowler for next over
+          needNewBowler = true;
+        } else if (runs % 2 === 1) {
+          // Switch strike for odd runs
+          newBatsmen.forEach(batsman => {
+            batsman.isOnStrike = !batsman.isOnStrike;
+          });
         }
       }
-
+      
       // Calculate economy
       const oversBowled = newBowler.ballsBowled / 6;
       newBowler.economy = oversBowled > 0 ? (newBowler.runs / oversBowled).toFixed(2) : 0;
-
+      
       // Calculate run rate
       const oversPlayed = newScore.balls / 6;
       newScore.runRate = oversPlayed > 0 ? (newScore.runs / oversPlayed).toFixed(2) : 0;
-
+      
       // Add to ball-by-ball commentary
       const ballDescription = isExtra 
         ? `${extraType} ${runs} run${runs > 1 ? 's' : ''}`
         : `${runs} run${runs > 1 ? 's' : ''} to ${newBatsmen[onStrikeBatsmanIndex]?.name || 'Batsman'}`;
-
+      
       const newBallByBall = [...(prev.ballByBall || []), {
         over: Math.floor(newScore.balls / 6) + 1,
         ball: (newScore.balls % 6) + 1,
         runs,
         description: ballDescription,
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: new Date().toLocaleTimeString(),
+        bowler: newBowler.name,
+        batsman: newBatsmen[onStrikeBatsmanIndex]?.name || ''
       }];
-
+      
       return {
         ...prev,
         currentScore: newScore,
         currentBatsmen: newBatsmen,
         currentBowler: newBowler,
         ballByBall: newBallByBall,
-        lastBalls: [...(prev.lastBalls || []).slice(-5), isExtra ? (extraType[0] || 'E') : runs]
+        lastBalls: [...(prev.lastBalls || []).slice(-5), runs],
+        needNewBowler
       };
     });
   };
@@ -319,16 +407,24 @@ const AddMatch = () => {
     setLiveScoring(prev => {
       const newScore = { ...prev.currentScore };
       const newBowler = { ...prev.currentBowler };
-
+      
       newScore.wickets += 1;
       newScore.balls += 1;
       newBowler.wickets += 1;
       newBowler.ballsBowled += 1;
-
+      
+      let needNewBowler = false;
+      
+      // Check if over is complete
+      if (newScore.balls % 6 === 0) {
+        newScore.overs = Math.floor(newScore.balls / 6);
+        needNewBowler = true;
+      }
+      
       // Calculate economy
       const oversBowled = newBowler.ballsBowled / 6;
       newBowler.economy = oversBowled > 0 ? (newBowler.runs / oversBowled).toFixed(2) : 0;
-
+      
       // Add to ball-by-ball commentary
       const newBallByBall = [...(prev.ballByBall || []), {
         over: Math.floor(newScore.balls / 6) + 1,
@@ -336,17 +432,22 @@ const AddMatch = () => {
         runs: 0,
         description: `WICKET! ${wicketType}`,
         timestamp: new Date().toLocaleTimeString(),
-        isWicket: true
+        isWicket: true,
+        bowler: newBowler.name
       }];
-
+      
       return {
         ...prev,
         currentScore: newScore,
         currentBowler: newBowler,
         ballByBall: newBallByBall,
-        lastBalls: [...(prev.lastBalls || []).slice(-5), 'W']
+        lastBalls: [...(prev.lastBalls || []).slice(-5), 'W'],
+        needNewBatsman: true,
+        needNewBowler
       };
     });
+    
+    setShowNewBatsmanModal(true);
   };
 
   const switchStrike = () => {
@@ -359,13 +460,29 @@ const AddMatch = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log('Match Data:', matchData);
-    console.log('Live Scoring:', liveScoring);
+  const publishMatch = () => {
+    // Create match object for publishing
+    const publishedMatch = {
+      id: Date.now(),
+      ...matchData,
+      ...liveScoring,
+      publishedAt: new Date().toISOString(),
+      status: liveScoring.isLive ? 'Live' : 'Completed',
+      viewers: videoStream.viewers
+    };
 
-    alert('Match created successfully!');
+    // Store in localStorage (in real app, this would be sent to backend)
+    const existingMatches = JSON.parse(localStorage.getItem('userMatches') || '[]');
+    existingMatches.push(publishedMatch);
+    localStorage.setItem('userMatches', JSON.stringify(existingMatches));
+
+    alert('Match published successfully!');
     navigate('/user-scoring');
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    publishMatch();
   };
 
   const startLiveScoring = () => {
@@ -373,19 +490,29 @@ const AddMatch = () => {
       ...prev,
       isLive: true,
       battingTeam: matchData.team1,
-      bowlingTeam: matchData.team2
+      bowlingTeam: matchData.team2,
+      currentScore: {
+        runs: 0,
+        wickets: 0,
+        overs: 0,
+        balls: 0,
+        extras: 0,
+        runRate: 0.0
+      }
     }));
     setCurrentStep(3);
   };
 
   useEffect(() => {
+    if (liveScoring.needNewBowler && liveScoring.currentScore.balls % 6 === 0) {
+      setShowNewBowlerModal(true);
+    }
+  }, [liveScoring.needNewBowler, liveScoring.currentScore.balls]);
+
+  useEffect(() => {
     return () => {
-      // Cleanup video stream and interval on component unmount
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (viewerIntervalRef.current) {
-        clearInterval(viewerIntervalRef.current);
       }
     };
   }, []);
@@ -438,7 +565,7 @@ const AddMatch = () => {
         {currentStep === 1 && (
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-red-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Match Details</h2>
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Match Title *
@@ -479,6 +606,36 @@ const AddMatch = () => {
                     value={matchData.team2}
                     onChange={handleInputChange}
                     placeholder="Team name"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Venue *
+                  </label>
+                  <input
+                    type="text"
+                    name="venue"
+                    value={matchData.venue}
+                    onChange={handleInputChange}
+                    placeholder="Match venue"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={matchData.date}
+                    onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
@@ -647,28 +804,6 @@ const AddMatch = () => {
                       </div>
                     )}
                   </div>
-
-                  {/* Stream Settings */}
-                  {videoStream.isStreaming && (
-                    <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <div className="text-sm text-gray-600">Quality</div>
-                        <div className="font-medium text-red-600">{streamSettings.resolution}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-gray-600">FPS</div>
-                        <div className="font-medium text-red-600">{streamSettings.frameRate}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-gray-600">Audio</div>
-                        <div className="font-medium text-red-600">{videoStream.hasAudio ? 'ON' : 'OFF'}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-gray-600">Bitrate</div>
-                        <div className="font-medium text-red-600">{streamSettings.bitrate}k</div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -694,20 +829,29 @@ const AddMatch = () => {
                 <div className="bg-white rounded-2xl shadow-xl p-6 border border-red-100">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">This Over</h3>
                   <div className="flex space-x-2 justify-center">
-                    {(liveScoring.lastBalls || []).slice(-6).map((ball, index) => (
-                      <div
-                        key={index}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          ball === 'W' 
-                            ? 'bg-red-600 text-white' 
-                            : typeof ball === 'number' && ball >= 4 
-                            ? 'bg-red-100 text-red-700 border border-red-300' 
-                            : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {ball}
-                      </div>
-                    ))}
+                    {Array.from({ length: 6 }, (_, index) => {
+                      const ballIndex = (liveScoring.currentScore.balls % 6) - 6 + index + 1;
+                      const ball = ballIndex >= 0 ? (liveScoring.lastBalls || [])[ballIndex] : null;
+                      return (
+                        <div
+                          key={index}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 ${
+                            ball === 'W' 
+                              ? 'bg-red-600 text-white border-red-600' 
+                              : typeof ball === 'number' && ball >= 4 
+                              ? 'bg-red-100 text-red-700 border-red-300' 
+                              : ball !== null
+                              ? 'bg-gray-100 text-gray-700 border-gray-300'
+                              : 'bg-white border-gray-200'
+                          }`}
+                        >
+                          {ball !== null ? ball : ''}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="text-center mt-2 text-sm text-gray-600">
+                    Over {Math.floor(liveScoring.currentScore.balls / 6) + 1}
                   </div>
                 </div>
               </div>
@@ -899,6 +1043,11 @@ const AddMatch = () => {
                         <span className="font-medium text-gray-900">
                           {ball.over}.{ball.ball}: {ball.description}
                         </span>
+                        {ball.bowler && (
+                          <div className="text-xs text-gray-600 mt-1">
+                            Bowler: {ball.bowler} {ball.batsman && `• Batsman: ${ball.batsman}`}
+                          </div>
+                        )}
                         {ball.isWicket && (
                           <span className="ml-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-medium">
                             WICKET
@@ -922,7 +1071,7 @@ const AddMatch = () => {
             <div className="bg-white rounded-2xl shadow-xl p-6 border border-red-100">
               <div className="flex space-x-4">
                 <button
-                  type="submit"
+                  onClick={handleSubmit}
                   className="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white py-4 px-6 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center justify-center"
                 >
                   <Save className="h-5 w-5 mr-2" />
@@ -939,6 +1088,99 @@ const AddMatch = () => {
           </div>
         )}
       </div>
+
+      {/* New Batsman Modal */}
+      {showNewBatsmanModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Add New Batsman</h3>
+            <p className="text-gray-600 mb-4">A wicket has fallen. Please add the new batsman.</p>
+            <input
+              type="text"
+              placeholder="Enter batsman name"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+              autoFocus
+            />
+            <div className="flex space-x-4">
+              <button
+                onClick={addNewBatsman}
+                className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Batsman
+              </button>
+              <button
+                onClick={() => {
+                  setShowNewBatsmanModal(false);
+                  setNewPlayerName('');
+                }}
+                className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Bowler Modal */}
+      {showNewBowlerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Change Bowler</h3>
+            <p className="text-gray-600 mb-4">Over completed. Please select the next bowler.</p>
+            
+            {/* Previous Bowlers */}
+            {liveScoring.availableBowlers && liveScoring.availableBowlers.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Previous Bowlers:</h4>
+                <div className="space-y-2">
+                  {liveScoring.availableBowlers.map((bowlerName, index) => (
+                    <button
+                      key={index}
+                      onClick={() => selectExistingBowler(bowlerName)}
+                      className="w-full text-left px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      {bowlerName}
+                    </button>
+                  ))}
+                </div>
+                <div className="my-4 text-center text-gray-500">or</div>
+              </div>
+            )}
+            
+            {/* New Bowler */}
+            <input
+              type="text"
+              placeholder="Enter new bowler name"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+              autoFocus
+            />
+            <div className="flex space-x-4">
+              <button
+                onClick={addNewBowler}
+                className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Bowler
+              </button>
+              <button
+                onClick={() => {
+                  setShowNewBowlerModal(false);
+                  setNewPlayerName('');
+                }}
+                className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
