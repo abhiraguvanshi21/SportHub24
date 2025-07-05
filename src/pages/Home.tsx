@@ -100,7 +100,7 @@ const Home = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-red-600 rounded-full blur-3xl opacity-30 animate-pulse"></div>
                 <div className="relative bg-white/10 backdrop-blur-sm p-8 rounded-3xl border border-white/20">
                   <img 
-                    src="/src/assets/logo.jpg" 
+                    src="https://www.sporthub24.com/public/uploads/images/logo/logo.png" 
                     alt="SportHub24 Logo" 
                     className="w-64 h-64 object-contain rounded-2xl shadow-2xl"
                   />
