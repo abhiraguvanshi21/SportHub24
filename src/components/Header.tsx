@@ -14,7 +14,6 @@ const Header = () => {
     { name: 'About', path: '/about' },
     { name: 'News', path: '/news' },
     { name: 'Live Scoring', path: '/live-scoring' },
-    { name: 'User Matches', path: '/user-scoring' },
     { name: 'Contact', path: '/contact' },
   ];
 
