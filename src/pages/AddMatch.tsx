@@ -40,15 +40,65 @@ interface MatchData {
   bowlingTeam?: string;
 }
 
+interface BallByBallEntry {
+  over: number;
+  ball: number | string;
+  runs: number;
+  description: string;
+  timestamp: string;
+  isWicket?: boolean;
+  wicketType?: string;
+  fielder?: string;
+  isExtra?: boolean;
+  extraType?: string;
+  bowler: string;
+  batsman: string;
+}
+
+type LastBallEntry = number | 'W' | 'Wd' | 'Nb';
+
+interface Batsman {
+  name: string;
+  runs: number;
+  balls: number;
+  fours: number;
+  sixes: number;
+  strikeRate: string;
+  isOnStrike: boolean;
+}
+
+interface Bowler {
+  name: string;
+  overs: number;
+  maidens: number;
+  runs: number;
+  wickets: number;
+  economy: string;
+  ballsBowled: number;
+}
+
+interface Score {
+  runs: number;
+  wickets: number;
+  overs: number;
+  balls: number;
+  runRate: string;
+  extras: number;
+  wides: number;
+  noBalls: number;
+  byes: number;
+  legByes: number;
+}
+
 const AddMatch = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [showTossModal, setShowTossModal] = useState(false);
-  const [selectedTossWinner, setSelectedTossWinner] = useState('');
-  const [selectedTossDecision, setSelectedTossDecision] = useState('');
-  const [showWicketModal, setShowWicketModal] = useState(false);
-  const [showExtraModal, setShowExtraModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [showTossModal, setShowTossModal] = useState<boolean>(false);
+  const [selectedTossWinner, setSelectedTossWinner] = useState<string>('');
+  const [selectedTossDecision, setSelectedTossDecision] = useState<string>('');
+  const [showWicketModal, setShowWicketModal] = useState<boolean>(false);
+  const [showExtraModal, setShowExtraModal] = useState<boolean>(false);
   
   const [matchData, setMatchData] = useState<MatchData>({
     title: '',
@@ -71,12 +121,12 @@ const AddMatch = () => {
     }
   });
 
-  const [currentBatsmen, setCurrentBatsmen] = useState([
+  const [currentBatsmen, setCurrentBatsmen] = useState<Batsman[]>([
     { name: '', runs: 0, balls: 0, fours: 0, sixes: 0, strikeRate: '0.00', isOnStrike: true },
     { name: '', runs: 0, balls: 0, fours: 0, sixes: 0, strikeRate: '0.00', isOnStrike: false }
   ]);
 
-  const [currentBowler, setCurrentBowler] = useState({
+  const [currentBowler, setCurrentBowler] = useState<Bowler>({
     name: '',
     overs: 0,
     maidens: 0,
@@ -86,7 +136,7 @@ const AddMatch = () => {
     ballsBowled: 0
   });
 
-  const [currentScore, setCurrentScore] = useState({
+  const [currentScore, setCurrentScore] = useState<Score>({
     runs: 0,
     wickets: 0,
     overs: 0,
@@ -99,11 +149,11 @@ const AddMatch = () => {
     legByes: 0
   });
 
-  const [ballByBall, setBallByBall] = useState([]);
-  const [lastBalls, setLastBalls] = useState([]);
-  const [showPlayerModal, setShowPlayerModal] = useState(false);
-  const [playerModalType, setPlayerModalType] = useState('');
-  const [playerModalIndex, setPlayerModalIndex] = useState(0);
+  const [ballByBall, setBallByBall] = useState<BallByBallEntry[]>([]);
+  const [lastBalls, setLastBalls] = useState<LastBallEntry[]>([]);
+  const [showPlayerModal, setShowPlayerModal] = useState<boolean>(false);
+  const [playerModalType, setPlayerModalType] = useState<string>('');
+  const [playerModalIndex, setPlayerModalIndex] = useState<number>(0);
 
   // Wicket types
   const wicketTypes = [
@@ -513,46 +563,53 @@ const AddMatch = () => {
     setShowExtraModal(false);
   };
 
-  const saveMatchData = (score: any, batsmen: any, bowler: any, ballByBallData: any, lastBallsData: any) => {
-    const completeMatchData = {
-      ...matchData,
-      id: Date.now(),
-      isLive: true,
-      status: 'Live',
-      hasLiveStream: true,
-      viewers: Math.floor(Math.random() * 500) + 50,
-      publishedAt: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
-      currentScore: score,
-      currentBatsmen: batsmen,
-      currentBowler: bowler,
-      ballByBall: ballByBallData,
-      lastBalls: lastBallsData
-    };
-
-    // Get existing matches
-    const existingMatches = JSON.parse(localStorage.getItem('userMatches') || '[]');
-    
-    // Find if this match already exists
-    const matchIndex = existingMatches.findIndex((match: any) => match.id === completeMatchData.id);
-    
-    if (matchIndex !== -1) {
-      // Update existing match
-      existingMatches[matchIndex] = completeMatchData;
-    } else {
-      // Add new match
-      existingMatches.push(completeMatchData);
-    }
-
-    // Save to localStorage
-    localStorage.setItem('userMatches', JSON.stringify(existingMatches));
-
-    // Trigger storage event for real-time updates
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: 'userMatches',
-      newValue: JSON.stringify(existingMatches)
-    }));
+const saveMatchData = (
+  score: Score,
+  batsmen: Batsman[],
+  bowler: Bowler,
+  ballByBallData: BallByBallEntry[],
+  lastBallsData: LastBallEntry[]
+) => {
+  const completeMatchData = {
+    ...matchData,
+    id: Date.now(),
+    isLive: true,
+    status: 'Live',
+    hasLiveStream: true,
+    viewers: Math.floor(Math.random() * 500) + 50,
+    publishedAt: new Date().toISOString(),
+    lastUpdated: new Date().toISOString(),
+    currentScore: score,
+    currentBatsmen: batsmen,
+    currentBowler: bowler,
+    ballByBall: ballByBallData,
+    lastBalls: lastBallsData
   };
+
+  // Get existing matches
+  const existingMatches = JSON.parse(localStorage.getItem('userMatches') || '[]');
+  
+  // Find if this match already exists
+  const matchIndex = existingMatches.findIndex((match: { id: number }) => match.id === completeMatchData.id);
+  
+  
+  if (matchIndex !== -1) {
+    // Update existing match
+    existingMatches[matchIndex] = completeMatchData;
+  } else {
+    // Add new match
+    existingMatches.push(completeMatchData);
+  }
+
+  // Save to localStorage
+  localStorage.setItem('userMatches', JSON.stringify(existingMatches));
+
+  // Trigger storage event for real-time updates
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: 'userMatches',
+    newValue: JSON.stringify(existingMatches)
+  }));
+};
 
   const startMatch = () => {
     if (!validateStep(3)) {
