@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   ESPN_CRICKET: "https://site.web.api.espn.com/apis/site/v2/sports/cricket",
   CRICBUZZ: "https://cricbuzz-cricket.p.rapidapi.com",
   SPORTS_DATA: "https://api.sportsdata.io/v3/cricket",
+  CRICBUZZ_RECENT: "https://cricbuzz-cricket.p.rapidapi.com/matches/v1/recent",
 };
 
 // RSS Feed URLs (No API key required)

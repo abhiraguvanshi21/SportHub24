@@ -44,7 +44,7 @@ class NewsService {
       const data = await response.json();
 
       if (data.status === 'ok' && data.articles) {
-        return data.articles.map((article: any) => ({
+        return data.articles.map((article: { title: string; description?: string; content?: string; url: string; urlToImage?: string; publishedAt: string; source?: { name?: string }; author?: string }) => ({
           id: `newsapi-${Date.now()}-${Math.random()}`,
           title: article.title,
           description: article.description || '',
@@ -68,16 +68,9 @@ class NewsService {
   }
 
   async fetchFromRSSFeeds(): Promise<ExternalNewsArticle[]> {
-    const rssFeeds = [
-      'https://www.espncricinfo.com/rss/content/story/feeds/0.xml',
-      'https://www.cricbuzz.com/rss-feed/cricket-news',
-      'https://feeds.feedburner.com/ndtvsports-cricket',
-      'https://timesofindia.indiatimes.com/rssfeeds/4719148.cms'
-    ];
-
     const articles: ExternalNewsArticle[] = [];
 
-    for (const feedUrl of rssFeeds) {
+    for (const feedUrl of RSS_FEEDS) {
       try {
         const proxyUrl = `${this.CORS_PROXY}${encodeURIComponent(feedUrl)}`;
         const response = await fetch(proxyUrl);

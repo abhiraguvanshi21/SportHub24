@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Clock, TrendingUp, Globe, Search, Filter, Eye, MessageCircle, Share2, Bookmark, Play, Zap, Bell, Rss, ExternalLink, Star, Siren as Fire, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { newsService, ExternalNewsArticle, LiveNewsUpdate } from '../services/newsService';
 
@@ -44,6 +44,7 @@ const News = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Convert external article to internal format
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const convertExternalArticle = (externalArticle: ExternalNewsArticle): NewsArticle => {
     const now = new Date();
     const publishedDate = new Date(externalArticle.publishedAt);
@@ -92,7 +93,7 @@ const News = () => {
   };
 
   // Fetch real news data
-  const fetchRealNews = async () => {
+  const fetchRealNews = useCallback(async () => {
     if (!isOnline) {
       setError('No internet connection. Please check your network and try again.');
       return;
@@ -126,7 +127,7 @@ const News = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isOnline, convertExternalArticle]);
 
   // Fallback data when API fails
   const loadFallbackData = () => {
@@ -208,12 +209,12 @@ const News = () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [isLiveMode]);
+  }, [fetchRealNews, isLiveMode]);
 
   // Initial data load
   useEffect(() => {
     fetchRealNews();
-  }, []);
+  }, [fetchRealNews]);
 
   // Real-time updates
   useEffect(() => {
