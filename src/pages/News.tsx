@@ -306,7 +306,7 @@ const News = () => {
               <h1 className="text-4xl md:text-5xl font-bold">Live Cricket News Hub</h1>
             </div>
             <p className="text-xl md:text-2xl text-red-100 max-w-3xl mx-auto mb-8">
-              Real-time cricket news from ESPN Cricinfo, Cricbuzz, and other trusted sources
+              Real-time cricket news
             </p>
             <div className="flex items-center justify-center space-x-6 text-red-100">
               <div className="flex items-center">
@@ -340,7 +340,7 @@ const News = () => {
         <div className="flex items-center">
           <div className="bg-red-800 px-4 py-2 font-bold text-sm whitespace-nowrap flex items-center">
             <Zap className="h-4 w-4 mr-2 animate-pulse" />
-            LIVE NEWS FROM REAL SOURCES
+            LIVE NEWS 
           </div>
           <div className="flex animate-scroll">
                 {liveUpdates.slice(0, 5).map((update) => (
@@ -447,7 +447,7 @@ const News = () => {
             {isLoading && articles.length === 0 && (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Fetching latest cricket news from real sources...</p>
+                <p className="text-gray-600">Fetching latest cricket news</p>
               </div>
             )}
 
@@ -490,7 +490,7 @@ const News = () => {
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                   <Star className="h-6 w-6 mr-2 text-red-600" />
-                  Featured Stories from Real Sources
+                  Featured Stories
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredArticles.filter(article => article.isFeatured).slice(0, 2).map((article) => (
@@ -566,7 +566,7 @@ const News = () => {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                 <Globe className="h-6 w-6 mr-2 text-red-600" />
-                Latest Cricket News from Real Sources
+                Latest Cricket News
                 {isLiveMode && isOnline && (
                   <div className="ml-3 flex items-center text-red-600">
                     <div className="w-2 h-2 bg-red-600 rounded-full mr-2 animate-pulse"></div>
