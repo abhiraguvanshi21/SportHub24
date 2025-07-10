@@ -218,16 +218,16 @@ class NewsService {
     
     const cricketImages = [
       'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=400&fit=crop&auto=format&q=80',
-      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=400&fit=crop&auto=format&q=80',
+      'https://th.bing.com/th?id=ORMS.b9ed55836be51722d02bd5778cf16162&pid=Wdp&w=300&h=156&qlt=90&c=1&rs=1&dpr=1.25&p=0',
       'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&h=400&fit=crop&auto=format&q=80',
     ];
 
     const specificImages: Record<string, string> = {
-      ipl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=400&fit=crop&auto=format&q=80',
+      ipl: 'https://th.bing.com/th/id/OIP.X4gtBNS6gqAT0VG00x8uXAHaEK?w=322&h=181&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3',
       t20: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&h=400&fit=crop&auto=format&q=80',
       worldcup: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=400&fit=crop&auto=format&q=80',
-      kohli: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=400&fit=crop&auto=format&q=80',
-      india: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=400&fit=crop&auto=format&q=80',
+      kohli: 'https://th.bing.com/th/id/OIP.jLVf0jSATd6dqxG1fJwMnAHaEK?w=320&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
+      india: 'https://th.bing.com/th/id/OIP.xwnUhm4XxNl0oInMtbjnqQHaHW?w=169&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3',
     };
 
     for (const [keyword, imageUrl] of Object.entries(specificImages)) {
