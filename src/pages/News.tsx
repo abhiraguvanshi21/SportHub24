@@ -1,5 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, TrendingUp, Globe, Search, Filter, Eye, MessageCircle, Share2, Bookmark, Play, Calendar, Users, Award, Target, Activity, Zap, Bell, Rss, ExternalLink, ChevronRight, Star, Siren as Fire, AlertCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { 
+  Clock, 
+  TrendingUp, 
+  Globe, 
+  Search, 
+  Filter, 
+  Eye, 
+  MessageCircle, 
+  Share2, 
+  Bookmark, 
+  Play, 
+  Zap, 
+  Bell, 
+  Rss, 
+  ExternalLink, 
+  Star, 
+  Siren as Fire, 
+  AlertCircle, 
+  RefreshCw, 
+  Wifi, 
+  WifiOff 
+} from 'lucide-react';
 import { newsService, ExternalNewsArticle, LiveNewsUpdate } from '../services/newsService';
 
 interface NewsArticle {
@@ -31,6 +52,13 @@ interface TrendingTopic {
   trend: 'up' | 'down' | 'stable';
 }
 
+interface NewsApiResponse {
+  articles: ExternalNewsArticle[];
+  liveUpdates: LiveNewsUpdate[];
+  trending: TrendingTopic[];
+  lastUpdated: string;
+}
+
 const News = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [liveUpdates, setLiveUpdates] = useState<LiveNewsUpdate[]>([]);
@@ -38,10 +66,8 @@ const News = () => {
   const [filteredArticles, setFilteredArticles] = useState<NewsArticle[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
-  const [newArticlesCount, setNewArticlesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +83,6 @@ const News = () => {
     // Determine category based on content
     let category: NewsArticle['category'] = 'match-report';
     const title = externalArticle.title.toLowerCase();
-    const description = externalArticle.description.toLowerCase();
     
     if (title.includes('breaking') || title.includes('urgent') || hoursAgo < 1) {
       category = 'breaking';
@@ -98,31 +123,8 @@ const News = () => {
     };
   };
 
-  // Auto-update countdown
-  useEffect(() => {
-    if (!autoUpdateEnabled || !isOnline) return;
-
-    const interval = setInterval(() => {
-      setNextUpdateIn(prev => {
-        if (prev <= 1) {
-          return 600; // Reset to 10 minutes
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [autoUpdateEnabled, isOnline]);
-
-  // Format countdown time
-  const formatCountdown = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
   // Fetch real news data
-  const fetchRealNews = async () => {
+  const fetchRealNews = useCallback(async () => {
     if (!isOnline) {
       setError('No internet connection. Please check your network and try again.');
       return;
@@ -141,7 +143,6 @@ const News = () => {
       setLiveUpdates(newsData.liveUpdates);
       setTrendingTopics(newsData.trending);
       setLastUpdateTime(new Date());
-      setNewArticlesCount(prev => prev + convertedArticles.length);
       setNextUpdateIn(600); // Reset countdown
       
       console.log('Fetched real news:', {
@@ -158,72 +159,31 @@ const News = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isOnline]);
 
-  // Fallback data when API fails
-  const loadFallbackData = () => {
-    const fallbackArticles: NewsArticle[] = [
-      {
-        id: 'fallback-1',
-        title: 'IPL 2025 Mega Auction: Record-Breaking Bids Expected',
-        summary: 'The upcoming IPL 2025 mega auction is set to witness unprecedented bidding wars with several marquee players in the fray.',
-        content: 'The IPL 2025 mega auction is generating massive excitement among cricket fans and franchise owners alike...',
-        category: 'breaking',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        author: 'Cricket Reporter',
-        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=400&fit=crop',
-        views: 15420,
-        comments: 234,
-        tags: ['IPL', 'Auction', '2025'],
-        isBreaking: true,
-        isFeatured: true,
-        source: 'SportHub24',
-        readTime: 3,
-        priority: 'high'
-      },
-      {
-        id: 'fallback-2',
-        title: 'Champions Trophy 2025: Squad Announcements Begin',
-        summary: 'Cricket boards around the world are starting to announce their squads for the upcoming Champions Trophy 2025.',
-        content: 'With the Champions Trophy 2025 approaching, cricket boards are finalizing their squads...',
-        category: 'upcoming',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        author: 'Sports Correspondent',
-        image: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&h=400&fit=crop',
-        views: 8930,
-        comments: 156,
-        tags: ['Champions Trophy', '2025', 'Squad'],
-        isFeatured: true,
-        source: 'Cricket News',
-        readTime: 4,
-        priority: 'medium'
-      }
-    ];
+  // Auto-update countdown
+  useEffect(() => {
+    if (!autoUpdateEnabled || !isOnline) return;
 
-    setArticles(fallbackArticles);
-    setLiveUpdates([
-      {
-        id: 'fallback-update-1',
-        text: 'LIVE: India vs Australia - Day 1 of Test match underway',
-        timestamp: new Date().toISOString(),
-        type: 'score',
-        priority: 'high',
-        source: 'Live Coverage'
-      }
-    ]);
-    setTrendingTopics([
-      { id: 'trend-1', name: 'IPL 2025', count: 25000, trend: 'up' },
-      { id: 'trend-2', name: 'Champions Trophy', count: 18000, trend: 'up' },
-      { id: 'trend-3', name: 'Cricket News', count: 12000, trend: 'stable' }
-    ]);
-  };
+    const interval = setInterval(() => {
+      setNextUpdateIn(prev => {
+        if (prev <= 1) {
+          fetchRealNews();
+          return 600; // Reset to 10 minutes
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [autoUpdateEnabled, isOnline, fetchRealNews]);
 
   // Setup auto-update listener
   useEffect(() => {
     if (!autoUpdateEnabled) return;
 
     // Add listener for auto-updates
-    const handleAutoUpdate = (data: any) => {
+    const handleAutoUpdate = (data: NewsApiResponse) => {
       const convertedArticles = data.articles.map(convertExternalArticle);
       setArticles(convertedArticles);
       setLiveUpdates(data.liveUpdates);
@@ -265,7 +225,7 @@ const News = () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [isLiveMode, autoUpdateEnabled]);
+  }, [isLiveMode, autoUpdateEnabled, fetchRealNews]);
 
   // Initial data load
   useEffect(() => {
@@ -275,7 +235,7 @@ const News = () => {
     return () => {
       newsService.destroy();
     };
-  }, []);
+  }, [fetchRealNews]);
 
   // Filter articles
   useEffect(() => {
@@ -296,7 +256,7 @@ const News = () => {
     setFilteredArticles(filtered);
   }, [articles, selectedCategory, searchTerm]);
 
-  const formatTimeAgo = (timestamp: string) => {
+ const formatTimeAgo = (timestamp: string) => {
     const now = new Date();
     const time = new Date(timestamp);
     const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
@@ -819,8 +779,8 @@ const News = () => {
                 {isOnline ? 'Connected to live news sources with image loading' : 'Offline - showing cached content'}
               </p>
             </div>
-
-            {/* Live Updates */}
+            
+              {/* Live Updates */}
             <div className="bg-white rounded-xl shadow-lg p-6 border border-red-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center">
