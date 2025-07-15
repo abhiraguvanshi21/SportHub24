@@ -1,44 +1,94 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  User as UserIcon, Mail, Phone, Calendar, Trophy, Target, TrendingUp, 
+import {
+  User, Mail, Phone, Calendar, Trophy, Target, TrendingUp,
   Edit3, Save, X, Camera, Award, BarChart3, Activity,
-  Settings
+  Users, MapPin, Star, Settings
 } from 'lucide-react';
 
-type PlayingRole = "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper" | "Not specified";
+// ===== Define User Type =====
+type UserStats = {
+  matchesPlayed: number;
+  matchesScored: number;
+  totalRuns: number;
+  highestScore: number;
+  battingAverage: number;
+  centuries: number;
+  halfCenturies: number;
+  totalFours: number;
+  totalSixes: number;
+  totalWickets: number;
+  bestBowling: string;
+  bowlingAverage: number;
+  fiveWicketHauls: number;
+  totalMaidens: number;
+  economyRate: number;
+  totalCatches: number;
+  totalRunOuts: number;
+  totalStumpings: number;
+  strikeRate: number;
+};
 
-type User = {
+type MatchStats = {
+  batting?: {
+    runs: number;
+    balls: number;
+    fours: number;
+    sixes: number;
+    strikeRate: number;
+  };
+  bowling?: {
+    wickets: number;
+    runs: number;
+    overs: number;
+    economy: number;
+    maidens: number;
+  };
+  fielding?: {
+    catches: number;
+    runOuts: number;
+    stumpings: number;
+  };
+};
+
+type MatchHistoryItem = {
+  id: string;
+  matchTitle: string;
+  date: string;
+  venue: string;
+  format: string;
+  result: string;
+  playerStats: MatchStats;
+};
+
+type UserType = {
   name: string;
   email: string;
   phone?: string;
   dateOfBirth?: string;
-  joinedDate: string;
-  profileImage?: string;
-  playingRole: PlayingRole;
   favoriteTeam?: string;
+  location?: string;
+  playingRole?: string;
+  profileImageUrl?: string;
+  joinedDate: string;
+  stats: UserStats;
+  matchHistory: MatchHistoryItem[];
   achievements: string[];
-  stats: {
-    matchesPlayed: number;
-    matchesScored: number;
-    totalRuns: number;
-    totalWickets: number;
-    highestScore: number;
-    battingAverage: number;
-    strikeRate: number;
-    bestBowling: string;
-    bowlingAverage: number;
-    economyRate: number;
-  };
 };
 
+// ===== Component =====
 const Profile = () => {
-  const { user, updateProfile, logout } = useAuth();
+  const { user, updateProfile, logout } = useAuth() as {
+    user: UserType | null;
+    updateProfile: (data: Partial<UserType>) => Promise<boolean>;
+    logout: () => void;
+  };
+
   const [isEditing, setIsEditing] = useState(false);
-  type UserProfile = User;
-  const [editData, setEditData] = useState<UserProfile>(user!);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [editData, setEditData] = useState<Partial<UserType>>(user || {});
+  const [activeTab, setActiveTab] = useState<'overview' | 'stats' | 'matches' | 'achievements'>('overview');
   const [isLoading, setIsLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   if (!user) {
     return (
@@ -54,11 +104,26 @@ const Profile = () => {
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setEditData((prev: UserProfile) => ({
-      ...prev,
-      [name]: value
-    }) as UserProfile);
+    setEditData({
+      ...editData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setImagePreview(result);
+        setEditData({
+          ...editData,
+          profileImageUrl: result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSave = async () => {
@@ -66,15 +131,19 @@ const Profile = () => {
     const success = await updateProfile(editData);
     if (success) {
       setIsEditing(false);
+      setImagePreview(null);
     }
     setIsLoading(false);
   };
+
   const handleCancel = () => {
-    setEditData(user as UserProfile);
+    setEditData(user);
     setIsEditing(false);
+    setImagePreview(null);
   };
 
-  const calculateAge = (dateOfBirth: string) => {
+  const calculateAge = (dateOfBirth?: string) => {
+    if (!dateOfBirth) return 'Not specified';
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -85,12 +154,17 @@ const Profile = () => {
     return age;
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Not specified';
+    return new Date(dateString).toLocaleDateString();
+  };
+
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: <UserIcon className="h-4 w-4" /> },
+    { id: 'overview', label: 'Overview', icon: <User className="h-4 w-4" /> },
     { id: 'stats', label: 'Statistics', icon: <BarChart3 className="h-4 w-4" /> },
     { id: 'matches', label: 'Match History', icon: <Activity className="h-4 w-4" /> },
     { id: 'achievements', label: 'Achievements', icon: <Award className="h-4 w-4" /> }
-  ];
+  ] as const;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 py-8">
@@ -100,19 +174,31 @@ const Profile = () => {
           <div className="bg-gradient-to-r from-red-600 to-red-800 h-32 relative">
             <div className="absolute -bottom-16 left-8">
               <div className="relative">
-                <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                  {user.profileImage ? (
-                    <img src={user.profileImage} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-lg flex items-center justify-center overflow-hidden">
+                  {imagePreview || user.profileImageUrl ? (
+                    <img 
+                      src={imagePreview || user.profileImageUrl} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover" 
+                    />
                   ) : (
-                    <UserIcon className="h-16 w-16 text-gray-400" />
+                    <User className="h-16 w-16 text-gray-400" />
                   )}
                 </div>
-                <button className="absolute bottom-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors">
-                  <Camera className="h-4 w-4" />
-                </button>
+                {isEditing && (
+                  <label className="absolute bottom-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors cursor-pointer">
+                    <Camera className="h-4 w-4" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
               </div>
             </div>
-            <div className="absolute top-4 right-8">
+            <div className="absolute top-4 right-4 flex space-x-2">
               {!isEditing ? (
                 <button
                   onClick={() => setIsEditing(true)}
@@ -157,7 +243,7 @@ const Profile = () => {
                 ) : (
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.name}</h1>
                 )}
-                <div className="flex items-center space-x-4 text-gray-600 mb-4">
+                <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-4">
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 mr-2" />
                     {isEditing ? (
@@ -174,8 +260,24 @@ const Profile = () => {
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2" />
-                    <span>Joined {new Date(user.joinedDate).toLocaleDateString()}</span>
+                    <span>Joined {formatDate(user.joinedDate)}</span>
                   </div>
+                  {user.location && (
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="location"
+                          value={editData.location || ''}
+                          onChange={handleInputChange}
+                          className="border-b border-gray-300 bg-transparent focus:outline-none focus:border-red-500"
+                        />
+                      ) : (
+                        <span>{user.location}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center space-x-6 text-sm">
                   <div className="flex items-center">
@@ -196,7 +298,24 @@ const Profile = () => {
               <div className="mt-4 md:mt-0">
                 <div className="bg-gradient-to-r from-red-100 to-red-200 p-4 rounded-xl border border-red-300">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{user.playingRole}</div>
+                    <div className="text-2xl font-bold text-red-600">
+                      {isEditing ? (
+                        <select
+                          name="playingRole"
+                          value={editData.playingRole || ''}
+                          onChange={handleInputChange}
+                          className="bg-transparent text-center focus:outline-none"
+                        >
+                          <option value="Not specified">Not specified</option>
+                          <option value="Batsman">Batsman</option>
+                          <option value="Bowler">Bowler</option>
+                          <option value="All-rounder">All-rounder</option>
+                          <option value="Wicket-keeper">Wicket-keeper</option>
+                        </select>
+                      ) : (
+                        user.playingRole
+                      )}
+                    </div>
                     <div className="text-sm text-gray-600">Playing Role</div>
                   </div>
                 </div>
@@ -267,10 +386,53 @@ const Profile = () => {
                           <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                           <span>
                             {user.dateOfBirth 
-                              ? `${new Date(user.dateOfBirth).toLocaleDateString()} (${calculateAge(user.dateOfBirth)} years)`
+                              ? `${formatDate(user.dateOfBirth)} (${calculateAge(user.dateOfBirth)} years)`
                               : 'Not provided'
                             }
                           </span>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Favorite Team</label>
+                      {isEditing ? (
+                        <select
+                          name="favoriteTeam"
+                          value={editData.favoriteTeam || ''}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        >
+                          <option value="">Select favorite team</option>
+                          <option value="Mumbai Indians">Mumbai Indians</option>
+                          <option value="Chennai Super Kings">Chennai Super Kings</option>
+                          <option value="Royal Challengers Bangalore">Royal Challengers Bangalore</option>
+                          <option value="Team India">Team India</option>
+                          <option value="Australia">Australia</option>
+                          <option value="England">England</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      ) : (
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>{user.favoriteTeam || 'Not specified'}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="location"
+                          value={editData.location || ''}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                          placeholder="Enter your location"
+                        />
+                      ) : (
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-2 text-gray-400" />
+                          <span>{user.location || 'Not specified'}</span>
                         </div>
                       )}
                     </div>
@@ -320,8 +482,26 @@ const Profile = () => {
                       <div className="text-sm text-gray-600">Highest Score</div>
                     </div>
                     <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
-                      <div className="text-3xl font-bold text-red-600">{user.stats.battingAverage}</div>
+                      <div className="text-3xl font-bold text-red-600">{user.stats.battingAverage.toFixed(2)}</div>
                       <div className="text-sm text-gray-600">Batting Average</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xl font-bold text-gray-700">{user.stats.centuries}</div>
+                      <div className="text-xs text-gray-600">Centuries</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xl font-bold text-gray-700">{user.stats.halfCenturies}</div>
+                      <div className="text-xs text-gray-600">Half Centuries</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xl font-bold text-gray-700">{user.stats.totalFours}</div>
+                      <div className="text-xs text-gray-600">Fours</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xl font-bold text-gray-700">{user.stats.totalSixes}</div>
+                      <div className="text-xs text-gray-600">Sixes</div>
                     </div>
                   </div>
                 </div>
@@ -342,34 +522,126 @@ const Profile = () => {
                       <div className="text-sm text-gray-600">Best Bowling</div>
                     </div>
                     <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
-                      <div className="text-3xl font-bold text-red-600">{user.stats.bowlingAverage}</div>
+                      <div className="text-3xl font-bold text-red-600">{user.stats.bowlingAverage.toFixed(2)}</div>
                       <div className="text-sm text-gray-600">Bowling Average</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xl font-bold text-gray-700">{user.stats.fiveWicketHauls}</div>
+                      <div className="text-xs text-gray-600">5 Wicket Hauls</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xl font-bold text-gray-700">{user.stats.totalMaidens}</div>
+                      <div className="text-xs text-gray-600">Maidens</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-xl font-bold text-gray-700">{user.stats.economyRate.toFixed(2)}</div>
+                      <div className="text-xs text-gray-600">Economy Rate</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fielding Stats */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-red-100">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                    <Users className="h-5 w-5 mr-2 text-red-800" />
+                    Fielding Statistics
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                      <div className="text-3xl font-bold text-red-600">{user.stats.totalCatches}</div>
+                      <div className="text-sm text-gray-600">Catches</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-100 rounded-lg border border-red-200">
+                      <div className="text-3xl font-bold text-red-700">{user.stats.totalRunOuts}</div>
+                      <div className="text-sm text-gray-600">Run Outs</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                      <div className="text-3xl font-bold text-red-600">{user.stats.totalStumpings}</div>
+                      <div className="text-sm text-gray-600">Stumpings</div>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
+            {activeTab === 'matches' && (
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-red-100">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Match History</h3>
+                {user.matchHistory.length > 0 ? (
+                  <div className="space-y-4">
+                    {user.matchHistory.map((match) => (
+                      <div key={match.id} className="border border-red-200 rounded-lg p-4 hover:bg-red-50 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-semibold text-gray-900">{match.matchTitle}</h4>
+                          <span className="text-sm text-gray-500">{formatDate(match.date)}</span>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-2">
+                          <span className="font-medium">{match.venue}</span> • {match.format}
+                        </div>
+                        <div className="text-sm font-medium text-red-600 mb-3">{match.result}</div>
+                        
+                        {/* Player Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                          {match.playerStats.batting && (
+                            <div className="bg-red-50 p-3 rounded border border-red-200">
+                              <div className="font-medium text-red-700 mb-1">Batting</div>
+                              <div>{match.playerStats.batting.runs} runs ({match.playerStats.batting.balls} balls)</div>
+                              <div>{match.playerStats.batting.fours} fours, {match.playerStats.batting.sixes} sixes</div>
+                              <div>SR: {match.playerStats.batting.strikeRate}</div>
+                            </div>
+                          )}
+                          {match.playerStats.bowling && (
+                            <div className="bg-red-50 p-3 rounded border border-red-200">
+                              <div className="font-medium text-red-700 mb-1">Bowling</div>
+                              <div>{match.playerStats.bowling.wickets}/{match.playerStats.bowling.runs} ({match.playerStats.bowling.overs} overs)</div>
+                              <div>Economy: {match.playerStats.bowling.economy}</div>
+                              <div>Maidens: {match.playerStats.bowling.maidens}</div>
+                            </div>
+                          )}
+                          {match.playerStats.fielding && (
+                            <div className="bg-red-50 p-3 rounded border border-red-200">
+                              <div className="font-medium text-red-700 mb-1">Fielding</div>
+                              <div>Catches: {match.playerStats.fielding.catches}</div>
+                              <div>Run Outs: {match.playerStats.fielding.runOuts}</div>
+                              <div>Stumpings: {match.playerStats.fielding.stumpings}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No match history yet. Start playing to see your matches here!</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === 'achievements' && (
               <div className="bg-white rounded-xl shadow-lg p-6 border border-red-100">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Achievements & Awards</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {user.achievements.map((achievement, index) => (
-                    <div key={index} className="flex items-center p-4 bg-red-50 rounded-lg border border-red-200">
-                      <Award className="h-8 w-8 text-red-600 mr-3" />
-                      <div>
-                        <div className="font-semibold text-gray-900">{achievement}</div>
-                        <div className="text-sm text-gray-600">2024</div>
+                {user.achievements.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {user.achievements.map((achievement, index) => (
+                      <div key={index} className="flex items-center p-4 bg-red-50 rounded-lg border border-red-200">
+                        <Award className="h-8 w-8 text-red-600 mr-3" />
+                        <div>
+                          <div className="font-semibold text-gray-900">{achievement}</div>
+                          <div className="text-sm text-gray-600">2024</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {user.achievements.length === 0 && (
-                    <div className="col-span-2 text-center py-8 text-gray-500">
-                      <Award className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>No achievements yet. Keep playing to earn your first award!</p>
-                    </div>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Award className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No achievements yet. Keep playing to earn your first award!</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -391,6 +663,10 @@ const Profile = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Matches Scored</span>
                   <span className="font-semibold">{user.stats.matchesScored}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Strike Rate</span>
+                  <span className="font-semibold">{user.stats.strikeRate.toFixed(2)}</span>
                 </div>
               </div>
             </div>
