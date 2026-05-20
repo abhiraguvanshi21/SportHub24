@@ -11,7 +11,7 @@ const Footer = () => {
               <div className="bg-gradient-to-r from-red-500 to-red-700 p-2 rounded-lg">
                 <Play className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold">SportHub24</span>
+              <span className="text-2xl font-bold">CricSem</span>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
               Your ultimate destination for live cricket scoring, match updates, and comprehensive cricket news. 
@@ -20,7 +20,7 @@ const Footer = () => {
             <div className="flex space-x-4">
               <div className="flex items-center space-x-2 text-gray-300">
                 <Mail className="h-4 w-4" />
-                <span>info@sporthub24.com</span>
+                <span>info@cricsem.com</span>
               </div>
               <div className="flex items-center space-x-2 text-gray-300">
                 <Phone className="h-4 w-4" />
@@ -55,7 +55,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 SportHub24. All rights reserved.</p>
+          <p>&copy; 2024 CricSem. All rights reserved.</p>
         </div>
       </div>
     </footer>

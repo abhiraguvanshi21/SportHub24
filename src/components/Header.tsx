@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Play, Plus, User, LogOut } from 'lucide-react';
+import { Menu, X, User, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
@@ -25,33 +26,54 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm border-b border-red-100 sticky top-0 z-50">
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="bg-white/80 backdrop-blur-lg border-b border-red-100 sticky top-0 z-50 shadow-sm"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="bg-gradient-to-r from-red-500 to-red-700 p-2 rounded-lg group-hover:scale-105 transition-transform">
-              <Play className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
-              SportHub24
-            </span>
+
+          {/* 🔥 Logo */}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <motion.div
+              whileHover={{ rotate: 10, scale: 1.1 }}
+              className="w-10 h-10 bg-gradient-to-r from-red-600 to-red-800 rounded-xl flex items-center justify-center shadow-lg"
+            >
+              <span className="text-white font-bold text-lg">🏏</span>
+            </motion.div>
+
+            <motion.span
+              whileHover={{ scale: 1.05 }}
+              className="text-2xl font-extrabold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent tracking-wide"
+            >
+              CRICSEM
+            </motion.span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
             {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  isActive(item.path)
-                    ? 'text-red-600 bg-red-50 border-b-2 border-red-500'
-                    : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
-                }`}
-              >
-                {item.name}
-              </Link>
+              <motion.div key={item.name} whileHover={{ y: -2 }}>
+                <Link
+                  to={item.path}
+                  className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 ${
+                    isActive(item.path)
+                      ? 'text-red-600'
+                      : 'text-gray-700 hover:text-red-600'
+                  }`}
+                >
+                  {item.name}
+
+                  {/* Animated underline */}
+                  {isActive(item.path) && (
+                    <motion.div
+                      layoutId="underline"
+                      className="absolute left-0 bottom-0 w-full h-[2px] bg-red-600"
+                    />
+                  )}
+                </Link>
+              </motion.div>
             ))}
           </nav>
 
@@ -59,145 +81,110 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/add-match"
-                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg font-medium hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Match
-                </Link>
-                
+                <motion.div whileHover={{ scale: 1.05 }}>
+                  <Link
+                    to="/add-match"
+                    className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-xl font-medium shadow hover:shadow-lg transition"
+                  >
+                    <Plus className="inline h-4 w-4 mr-1" />
+                    Add Match
+                  </Link>
+                </motion.div>
+
                 {/* User Menu */}
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-red-50 transition"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-red-700 rounded-full flex items-center justify-center">
+                    <div className="w-9 h-9 bg-gradient-to-r from-red-600 to-red-700 rounded-full flex items-center justify-center shadow">
                       <User className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">{user?.name}</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {user?.name}
+                    </span>
                   </button>
-                  
-                  {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                      <Link
-                        to="/profile"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
+
+                  <AnimatePresence>
+                    {isUserMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2"
                       >
-                        <User className="h-4 w-4 mr-3" />
-                        My Profile
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
-                      >
-                        <LogOut className="h-4 w-4 mr-3" />
-                        Logout
-                      </button>
-                    </div>
-                  )}
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="block px-4 py-2 hover:bg-red-50"
+                        >
+                          My Profile
+                        </Link>
+
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 hover:bg-red-50"
+                        >
+                          Logout
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </>
             ) : (
-              <div className="flex items-center space-x-3">
-                <Link
-                  to="/login"
-                  className="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
+              <>
+                <Link to="/login" className="hover:text-red-600">
                   Login
                 </Link>
-                <Link
-                  to="/signup"
-                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg font-medium hover:from-red-700 hover:to-red-800 transition-all duration-200"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
-          </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-md text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white/95 backdrop-blur-sm border-t border-red-100">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
-                    isActive(item.path)
-                      ? 'text-red-600 bg-red-50 border-l-4 border-red-500'
-                      : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/add-match"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-600 to-red-700 text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-2 inline" />
-                    Add Match
-                  </Link>
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <User className="h-4 w-4 mr-2 inline" />
-                    My Profile
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="h-4 w-4 mr-2 inline" />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <div className="space-y-1">
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-red-600 hover:bg-red-50"
-                  >
-                    Login
-                  </Link>
+                <motion.div whileHover={{ scale: 1.05 }}>
                   <Link
                     to="/signup"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-600 to-red-700 text-white"
+                    className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-xl shadow"
                   >
                     Sign Up
                   </Link>
-                </div>
-              )}
-            </div>
+                </motion.div>
+              </>
+            )}
           </div>
-        )}
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden"
+          >
+            {isMenuOpen ? <X /> : <Menu />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="md:hidden overflow-hidden"
+            >
+              <div className="py-3 space-y-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block px-3 py-2 hover:bg-red-50 rounded-lg"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

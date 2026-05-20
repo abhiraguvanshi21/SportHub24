@@ -328,6 +328,11 @@ const LiveScoring = () => {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
+  const formatOverBall = (over: number, ball: number) => {
+    const overNumber = Math.max(0, over - 1);
+    return `${overNumber}.${ball}`;
+  };
+
   const liveMatches = matches.filter((match) => match.status === "Live");
   const userLiveMatches = liveMatches.filter((match) => match.isUserMatch);
   const professionalMatches = liveMatches.filter((match) => !match.isUserMatch);
@@ -691,42 +696,63 @@ const LiveScoring = () => {
                 <h3 className="text-xl font-semibold text-gray-900">
                   Ball-by-Ball Commentary
                 </h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {match.ballByBall
-                    ?.slice()
-                    .reverse()
-                    .map((ball, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg border ${
-                          ball.isWicket
-                            ? "bg-red-50 border-red-200"
-                            : ball.isExtra
-                            ? "bg-yellow-50 border-yellow-200"
-                            : "bg-gray-50 border-gray-200"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="font-medium text-lg">
-                            {ball.over}.{ball.ball}: {ball.description}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {formatTimeAgo(ball.timestamp)}
-                          </span>
-                        </div>
-                        {ball.bowler && (
-                          <div className="text-sm text-gray-600">
-                            Bowler: {ball.bowler} | Batsman: {ball.batsman}
-                          </div>
-                        )}
+                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                  <div className="p-4 border-b border-gray-200 bg-gray-50">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          Live Score
+                        </p>
+                        <p className="text-lg font-bold text-red-700">
+                          {match.currentScore?.runs}/{match.currentScore?.wickets} (
+                          {Math.floor((match.currentScore?.balls || 0) / 6)}.
+                          {(match.currentScore?.balls || 0) % 6} overs)
+                        </p>
                       </div>
-                    ))}
-                  {(!match.ballByBall || match.ballByBall.length === 0) && (
-                    <div className="text-center py-8 text-gray-500">
-                      <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>No commentary available yet</p>
+                      <div className="text-sm text-gray-500">
+                        RR: {match.currentScore?.runRate} | Extras:{" "}
+                        {match.currentScore?.extras}
+                      </div>
                     </div>
-                  )}
+                  </div>
+                  <div className="max-h-96 overflow-y-auto divide-y divide-gray-200">
+                    {match.ballByBall
+                      ?.slice()
+                      .reverse()
+                      .map((ball, index) => (
+                        <div
+                          key={index}
+                          className={`p-4 ${
+                            ball.isWicket
+                              ? "bg-red-50"
+                              : ball.isExtra
+                              ? "bg-yellow-50"
+                              : "bg-white"
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="font-medium text-gray-900">
+                              {formatOverBall(ball.over, ball.ball)}:{" "}
+                              {ball.description}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {formatTimeAgo(ball.timestamp)}
+                            </span>
+                          </div>
+                          {ball.bowler && (
+                            <div className="text-sm text-gray-600">
+                              Bowler: {ball.bowler} | Batsman: {ball.batsman}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    {(!match.ballByBall || match.ballByBall.length === 0) && (
+                      <div className="p-8 text-center text-gray-500">
+                        <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p>No commentary available yet</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
